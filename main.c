@@ -17,7 +17,7 @@ struct Instruction {
     union {
         struct StoreInstruction store;
         struct BranchInstruction branch;
-    };
+    } as;
 };
 
 int main(void)

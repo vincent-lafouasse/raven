@@ -17,7 +17,6 @@ target_sources(${PROJECT_NAME} PRIVATE
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src src/common)
-target_link_libraries(${PROJECT_NAME} PRIVATE m)
 
 target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -g3
                                                -fdiagnostics-color=always)

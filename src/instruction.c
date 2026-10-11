@@ -1,6 +1,7 @@
 #include "instruction.h"
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include "utils.h"
 
@@ -115,20 +116,44 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
     out->rs1 = data.rs1;
     out->rs2 = data.rs2;
 
+    // only error path is BAD_FUNCT7
+    bool ok = true;
+
     switch (data.funct3) {
         case 0:
             if (data.funct7 == 0x00) {
                 out->mnemonic = OP_ADD;
-                return DR_OK;
             } else if (data.funct7 == 0x20) {
                 out->mnemonic = OP_SUB;
-                return DR_OK;
             } else {
-                return DR_BAD_FUNCT7;
+                ok = false;
+            }
+        case 1:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_SLL;
+            } else {
+                ok = false;
+            }
+        case 2:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_SLT;
+            } else {
+                ok = false;
+            }
+        case 3:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_SLTU;
+            } else {
+                ok = false;
             }
         default:
             UNREACHABLE();
     }
+
+    if (ok)
+        return DR_OK;
+    else
+        return DR_BAD_FUNCT7;
 }
 
 enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);

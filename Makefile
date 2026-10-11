@@ -56,6 +56,9 @@ test: debug
 run: debug
 	$(DEBUG_DIR)/bin/raven $(ARGS)
 
+format:
+	clang-format -i $(shell find src -name '*.c' -or -name '*.h')
+
 clean:
 	@for d in $(DEBUG_DIR) $(RELEASE_DIR); do \
 		if [ -f $$d/build.ninja ]; then $(NINJA) -C $$d clean; fi; \

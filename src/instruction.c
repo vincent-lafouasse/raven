@@ -274,8 +274,69 @@ static enum DecodeResult decode_load(u32 word, struct Instruction out[static 1])
     return DR_OK;
 }
 
-enum DecodeResult decode_store(u32 word, struct Instruction out[static 1]);
-enum DecodeResult decode_branch(u32 word, struct Instruction out[static 1]);
+static enum DecodeResult decode_store(u32 word,
+                                      struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_S);
+
+    enum Mnemonic m;
+
+    switch (data.funct3) {
+        case 0:
+            m = OP_SB;
+            break;
+        case 1:
+            m = OP_SH;
+            break;
+        case 2:
+            m = OP_SW;
+            break;
+        default:
+            // 3 is SD on RV64, the rest are reserved
+            return DR_BAD_FUNCT3;
+    }
+
+    *out = (struct Instruction){
+        .mnemonic = m, .rs1 = data.rs1, .rs2 = data.rs2, .imm = data.imm};
+    return DR_OK;
+}
+
+static enum DecodeResult decode_branch(u32 word,
+                                       struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_B);
+
+    enum Mnemonic m;
+
+    switch (data.funct3) {
+        case 0:
+            m = OP_BEQ;
+            break;
+        case 1:
+            m = OP_BNE;
+            break;
+        case 4:
+            m = OP_BLT;
+            break;
+        case 5:
+            m = OP_BGE;
+            break;
+        case 6:
+            m = OP_BLTU;
+            break;
+        case 7:
+            m = OP_BGEU;
+            break;
+        default:
+            // 2 and 3 are reserved
+            return DR_BAD_FUNCT3;
+    }
+
+    *out = (struct Instruction){
+        .mnemonic = m, .rs1 = data.rs1, .rs2 = data.rs2, .imm = data.imm};
+    return DR_OK;
+}
+
 enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1]);
@@ -298,7 +359,9 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         case OPC_LOAD:
             return decode_load(word, out);
         case OPC_STORE:
+            return decode_store(word, out);
         case OPC_BRANCH:
+            return decode_branch(word, out);
         case OPC_JAL:
         case OPC_JALR:
         case OPC_LUI:

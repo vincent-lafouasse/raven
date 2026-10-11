@@ -9,7 +9,12 @@ enum InstructionKind {
     IK_JUMP,
 };
 
-struct StoreInstruction {};
+struct StoreInstruction {
+    u8 funct3;
+    u8 rs1, rs2;
+    u16 imm;
+};
+
 struct BranchInstruction {};
 
 struct Instruction {

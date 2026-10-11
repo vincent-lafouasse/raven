@@ -242,7 +242,38 @@ static enum DecodeResult decode_op_imm(u32 word,
     return DR_OK;
 }
 
-enum DecodeResult decode_load(u32 word, struct Instruction out[static 1]);
+static enum DecodeResult decode_load(u32 word, struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_I);
+
+    enum Mnemonic m;
+
+    switch (data.funct3) {
+        case 0:
+            m = OP_LB;
+            break;
+        case 1:
+            m = OP_LH;
+            break;
+        case 2:
+            m = OP_LW;
+            break;
+        case 4:
+            m = OP_LBU;
+            break;
+        case 5:
+            m = OP_LHU;
+            break;
+        default:
+            // 3, 6, 7 are LD, LWU and reserved, none of which exist on RV32
+            return DR_BAD_FUNCT3;
+    }
+
+    *out = (struct Instruction){
+        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = data.imm};
+    return DR_OK;
+}
+
 enum DecodeResult decode_store(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_branch(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1]);
@@ -265,6 +296,7 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         case OPC_OP_IMM:
             return decode_op_imm(word, out);
         case OPC_LOAD:
+            return decode_load(word, out);
         case OPC_STORE:
         case OPC_BRANCH:
         case OPC_JAL:

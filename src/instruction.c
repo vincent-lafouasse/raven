@@ -45,5 +45,21 @@ struct Instruction decode_instruction(u32 word)
     const u32 opcode = u32_get_bits(word, 0, 6);
     (void)opcode;
 
+    switch (opcode) {
+        case OPC_OP:
+        case OPC_OP_IMM:
+        case OPC_LOAD:
+        case OPC_STORE:
+        case OPC_BRANCH:
+        case OPC_JAL:
+        case OPC_JALR:
+        case OPC_LUI:
+        case OPC_AUIPC:
+        case OPC_SYSTEM:
+        case OPC_MISC_MEM:
+        default:
+            break;
+    }
+
     return (struct Instruction){0};
 }

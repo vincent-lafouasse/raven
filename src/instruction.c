@@ -30,4 +30,9 @@ static struct Instruction make_store(u8 opcode,
     };
 }
 
-struct Instruction decode_instruction(u32 raw_instruction);
+struct Instruction decode_instruction(u32 word)
+{
+    const u32 opcode = u32_get_gits(word, 0, 6);
+
+    return (struct Instruction){0};
+}

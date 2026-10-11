@@ -181,7 +181,7 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
     }
 
     *out = (struct Instruction){
-        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .rs2 = data.rs2, 0};
+        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .rs2 = data.rs2};
     return DR_OK;
 }
 
@@ -238,7 +238,7 @@ static enum DecodeResult decode_op_imm(u32 word,
     }
 
     *out = (struct Instruction){
-        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = imm, 0};
+        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = imm};
     return DR_OK;
 }
 

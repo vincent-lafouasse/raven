@@ -106,6 +106,25 @@ enum Opcode {
     OPC_MISC_MEM = 0x0f,
 };
 
+static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
+{
+    (void)word;
+    (void)out;
+
+    return DR_OK;
+}
+
+enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_load(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_store(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_branch(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_auipc(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_system(u32 word, struct Instruction out[static 1]);
+enum DecodeResult decode_misc_mem(u32 word, struct Instruction out[static 1]);
+
 enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
 {
     if ((word & 0x3) != 0x3) {
@@ -115,7 +134,7 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
     const u32 opcode = u32_get_bits(word, 0, 6);
     switch (opcode) {
         case OPC_OP:
-            // dummy
+            return decode_op(word, out);
         case OPC_OP_IMM:
         case OPC_LOAD:
         case OPC_STORE:

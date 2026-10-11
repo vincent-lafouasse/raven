@@ -65,13 +65,11 @@ struct Instruction {
 
 enum DecodeResult {
     DR_OK = 0,
-    DR_BAD_LENGTH,  // low two bits are not 0b11 (compressed or garbage)
-    DR_BAD_OPCODE,  // major opcode (bits 6:0) is not one you know
-    DR_BAD_FUNCT3,  // valid opcode, funct3 not defined for it
-    DR_BAD_FUNCT7,  // valid opcode/funct3, funct7 (or shift-imm upper bits) not
-                    // defined
-    DR_UNSUPPORTED,  // legal RISC-V that you chose not to implement (FENCE,
-                     // ECALL, ...)
+    DR_BAD_LENGTH,
+    DR_BAD_OPCODE,
+    DR_BAD_FUNCT3,
+    DR_BAD_FUNCT7,
+    DR_UNSUPPORTED,
 };
 
 enum DecodeResult decode_instruction(u32 word,

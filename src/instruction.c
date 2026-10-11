@@ -148,6 +148,4 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         default:
             return DR_BAD_OPCODE;
     }
-
-    return DR_OK;
 }

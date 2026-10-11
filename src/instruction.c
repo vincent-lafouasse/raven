@@ -38,6 +38,14 @@ static u32 u32_get_bits(u32 data, u8 start, u8 end)
     return (data >> start) & mask;
 }
 
+static i32 sign_extend(u32 value, u8 width)
+{
+    assert(width >= 1 && width <= 32);
+
+    const u8 shift = 32 - width;
+    return (i32)(value << shift) >> shift;
+}
+
 static struct Payload read_payload(u32 word, enum Format fmt);
 
 struct Instruction decode_instruction(u32 word)

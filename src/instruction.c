@@ -25,11 +25,6 @@ enum Format {
     FMT_B,
 };
 
-struct Payload {
-    u8 rd, rs1, rs2;
-    i32 imm;
-};
-
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
@@ -46,24 +41,34 @@ static i32 sign_extend(u32 value, u8 width)
     return (i32)(value << shift) >> shift;
 }
 
-static struct Payload read_payload(u32 word, enum Format fmt)
+struct RawPayload {
+    u8 rd, rs1, rs2;
+    u8 funct3, funct7;
+    i32 imm;
+};
+
+static struct RawPayload read_payload(u32 word, enum Format fmt)
 {
-    struct Payload out = {0};
+    struct RawPayload out = {0};
 
     switch (fmt) {
         case FMT_R:
             out.rd = u32_get_bits(word, 7, 11);
+            out.funct3 = u32_get_bits(word, 12, 14);
             out.rs1 = u32_get_bits(word, 15, 19);
             out.rs2 = u32_get_bits(word, 20, 24);
+            out.funct7 = u32_get_bits(word, 25, 31);
             break;
 
         case FMT_I:
             out.rd = u32_get_bits(word, 7, 11);
+            out.funct3 = u32_get_bits(word, 12, 14);
             out.rs1 = u32_get_bits(word, 15, 19);
             out.imm = sign_extend(u32_get_bits(word, 20, 31), 12);
             break;
 
         case FMT_S:
+            out.funct3 = u32_get_bits(word, 12, 14);
             out.rs1 = u32_get_bits(word, 15, 19);
             out.rs2 = u32_get_bits(word, 20, 24);
             out.imm = sign_extend(
@@ -72,6 +77,7 @@ static struct Payload read_payload(u32 word, enum Format fmt)
             break;
 
         case FMT_B:
+            out.funct3 = u32_get_bits(word, 12, 14);
             out.rs1 = u32_get_bits(word, 15, 19);
             out.rs2 = u32_get_bits(word, 20, 24);
             out.imm = sign_extend((u32_get_bits(word, 31, 31) << 12) |

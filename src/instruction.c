@@ -117,16 +117,18 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
 
     switch (data.funct3) {
         case 0:
-            if (0) {
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_ADD;
+                return DR_OK;
+            } else if (data.funct7 == 0x20) {
+                out->mnemonic = OP_SUB;
                 return DR_OK;
             } else {
-                return DR_OK;
+                return DR_BAD_FUNCT7;
             }
         default:
             UNREACHABLE();
     }
-
-    UNREACHABLE();
 }
 
 enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);

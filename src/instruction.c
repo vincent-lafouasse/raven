@@ -108,8 +108,10 @@ enum Opcode {
 
 static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
 {
-    (void)word;
-    (void)out;
+    const struct RawPayload data = read_payload(word, FMT_R);
+    out->rd = data.rd;
+    out->rs1 = data.rs1;
+    out->rs2 = data.rs2;
 
     return DR_OK;
 }

@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-u32 u32_get_gits(u32 data, u8 start, u8 end)
+static u32 u32_get_gits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
 

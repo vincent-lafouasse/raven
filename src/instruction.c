@@ -185,7 +185,63 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
     return DR_OK;
 }
 
-enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);
+static enum DecodeResult decode_op_imm(u32 word,
+                                       struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_I);
+    const u32 upper = u32_get_bits(word, 25, 31);  // imm[11:5]
+    const u32 shamt = u32_get_bits(word, 20, 24);  // imm[4:0]
+
+    enum Mnemonic m;
+    i32 imm = data.imm;
+
+    switch (data.funct3) {
+        case 0:
+            m = OP_ADDI;
+            break;
+        case 1:
+            if (upper == 0x00) {
+                m = OP_SLLI;
+                imm = shamt;
+            } else {
+                return DR_BAD_FUNCT7;
+            }
+            break;
+        case 2:
+            m = OP_SLTI;
+            break;
+        case 3:
+            m = OP_SLTIU;
+            break;
+        case 4:
+            m = OP_XORI;
+            break;
+        case 5:
+            if (upper == 0x00) {
+                m = OP_SRLI;
+                imm = shamt;
+            } else if (upper == 0x20) {
+                m = OP_SRAI;
+                imm = shamt;
+            } else {
+                return DR_BAD_FUNCT7;
+            }
+            break;
+        case 6:
+            m = OP_ORI;
+            break;
+        case 7:
+            m = OP_ANDI;
+            break;
+        default:
+            UNREACHABLE();
+    }
+
+    *out = (struct Instruction){
+        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = imm, 0};
+    return DR_OK;
+}
+
 enum DecodeResult decode_load(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_store(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_branch(u32 word, struct Instruction out[static 1]);
@@ -207,6 +263,7 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         case OPC_OP:
             return decode_op(word, out);
         case OPC_OP_IMM:
+            return decode_op_imm(word, out);
         case OPC_LOAD:
         case OPC_STORE:
         case OPC_BRANCH:

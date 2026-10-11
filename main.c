@@ -12,13 +12,13 @@ enum InstructionKind {
 };
 
 struct StoreInstruction {
-    uint8_t rs1, rs2, funct3;
-    int32_t imm; /* s12 */
+    u8 rs1, rs2, funct3;
+    i32 imm; /* s12 */
 };
 
 struct BranchInstruction {
-    uint8_t rs1, rs2, funct3;
-    int32_t imm; /* s13, bit 0 always 0 */
+    u8 rs1, rs2, funct3;
+    i32 imm; /* s13, bit 0 always 0 */
 };
 
 struct Instruction {

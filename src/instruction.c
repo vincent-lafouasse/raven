@@ -2,7 +2,7 @@
 
 #include <assert.h>
 
-static u32 u32_get_gits(u32 data, u8 start, u8 end)
+static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
 
@@ -32,7 +32,7 @@ static struct Instruction make_store(u8 opcode,
 
 struct Instruction decode_instruction(u32 word)
 {
-    const u32 opcode = u32_get_gits(word, 0, 6);
+    const u32 opcode = u32_get_bits(word, 0, 6);
 
     return (struct Instruction){0};
 }

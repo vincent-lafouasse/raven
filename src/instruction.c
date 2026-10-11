@@ -337,8 +337,28 @@ static enum DecodeResult decode_branch(u32 word,
     return DR_OK;
 }
 
-enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1]);
-enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1]);
+static enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_J);
+
+    *out = (struct Instruction){
+        .mnemonic = OP_JAL, .rd = data.rd, .imm = data.imm};
+    return DR_OK;
+}
+
+static enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_I);
+
+    if (data.funct3 != 0) {
+        return DR_BAD_FUNCT3;
+    }
+
+    *out = (struct Instruction){
+        .mnemonic = OP_JALR, .rd = data.rd, .rs1 = data.rs1, .imm = data.imm};
+    return DR_OK;
+}
+
 enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_auipc(u32 word, struct Instruction out[static 1]);
 enum DecodeResult decode_system(u32 word, struct Instruction out[static 1]);
@@ -363,7 +383,9 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         case OPC_BRANCH:
             return decode_branch(word, out);
         case OPC_JAL:
+            return decode_jal(word, out);
         case OPC_JALR:
+            return decode_jalr(word, out);
         case OPC_LUI:
         case OPC_AUIPC:
         case OPC_SYSTEM:

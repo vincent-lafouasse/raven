@@ -1,4 +1,6 @@
-as=riscv32-unknown-elf-as; oc=riscv32-unknown-elf-objcopy
+base=riscv64-unknown-elf
+as=${base}-as
+oc=${base}-objcopy
 $as -march=rv32i -mabi=ilp32 -o test.o test.s
 $oc -O binary -j .text test.o test.bin
 

@@ -108,10 +108,14 @@ enum Opcode {
 
 enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
 {
-    const u32 opcode = u32_get_bits(word, 0, 6);
+    if ((word & 0x3) != 0x3) {
+        return DR_BAD_LENGTH;
+    }
 
+    const u32 opcode = u32_get_bits(word, 0, 6);
     switch (opcode) {
         case OPC_OP:
+            // dummy
         case OPC_OP_IMM:
         case OPC_LOAD:
         case OPC_STORE:

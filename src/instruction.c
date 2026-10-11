@@ -16,6 +16,22 @@ enum Opcode {
     OPC_MISC_MEM = 0x0f,
 };
 
+enum Format {
+    FMT_R,
+    FMT_I,
+    FMT_S,
+    FMT_U,
+    FMT_J,
+    FMT_B,
+};
+
+struct Payload {
+    u8 rd, rs1, rs2;
+    i32 imm;
+};
+
+static struct Payload read_payload(u32 word, enum Format fmt);
+
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);

@@ -26,6 +26,8 @@ struct Instruction {
     } as;
 };
 
+struct Instruction decode_instruction(u32 raw_instruction);
+
 int main(void)
 {
     return 0;

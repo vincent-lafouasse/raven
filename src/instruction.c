@@ -46,7 +46,59 @@ static i32 sign_extend(u32 value, u8 width)
     return (i32)(value << shift) >> shift;
 }
 
-static struct Payload read_payload(u32 word, enum Format fmt);
+static struct Payload read_payload(u32 word, enum Format fmt)
+{
+    struct Payload out = {0};
+
+    switch (fmt) {
+        case FMT_R:
+            out.rd = u32_get_bits(word, 7, 11);
+            out.rs1 = u32_get_bits(word, 15, 19);
+            out.rs2 = u32_get_bits(word, 20, 24);
+            break;
+
+        case FMT_I:
+            out.rd = u32_get_bits(word, 7, 11);
+            out.rs1 = u32_get_bits(word, 15, 19);
+            out.imm = sign_extend(u32_get_bits(word, 20, 31), 12);
+            break;
+
+        case FMT_S:
+            out.rs1 = u32_get_bits(word, 15, 19);
+            out.rs2 = u32_get_bits(word, 20, 24);
+            out.imm = sign_extend(
+                (u32_get_bits(word, 25, 31) << 5) | u32_get_bits(word, 7, 11),
+                12);
+            break;
+
+        case FMT_B:
+            out.rs1 = u32_get_bits(word, 15, 19);
+            out.rs2 = u32_get_bits(word, 20, 24);
+            out.imm = sign_extend((u32_get_bits(word, 31, 31) << 12) |
+                                      (u32_get_bits(word, 7, 7) << 11) |
+                                      (u32_get_bits(word, 25, 30) << 5) |
+                                      (u32_get_bits(word, 8, 11) << 1),
+                                  13);
+            break;
+
+        case FMT_U:
+            out.rd = u32_get_bits(word, 7, 11);
+            out.imm =
+                (i32)(word & 0xFFFFF000u);  // already shifted, low 12 bits zero
+            break;
+
+        case FMT_J:
+            out.rd = u32_get_bits(word, 7, 11);
+            out.imm = sign_extend((u32_get_bits(word, 31, 31) << 20) |
+                                      (u32_get_bits(word, 12, 19) << 12) |
+                                      (u32_get_bits(word, 20, 20) << 11) |
+                                      (u32_get_bits(word, 21, 30) << 1),
+                                  21);
+            break;
+    }
+
+    return out;
+}
 
 struct Instruction decode_instruction(u32 word)
 {

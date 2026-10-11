@@ -18,6 +18,7 @@ struct StoreInstruction {
 struct BranchInstruction {};
 
 struct Instruction {
+    u8 opcode;
     enum InstructionKind kind;
     union {
         struct StoreInstruction store;

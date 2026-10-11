@@ -30,8 +30,6 @@ struct Payload {
     i32 imm;
 };
 
-static struct Payload read_payload(u32 word, enum Format fmt);
-
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
@@ -39,6 +37,8 @@ static u32 u32_get_bits(u32 data, u8 start, u8 end)
     const u32 mask = UINT32_MAX >> (31 - (end - start));
     return (data >> start) & mask;
 }
+
+static struct Payload read_payload(u32 word, enum Format fmt);
 
 struct Instruction decode_instruction(u32 word)
 {

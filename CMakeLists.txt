@@ -9,17 +9,26 @@ set(CMAKE_C_EXTENSIONS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-add_executable(${PROJECT_NAME})
-target_sources(${PROJECT_NAME} PRIVATE
-    src/main.c
-
-    src/instruction.c
+add_library(raven_flags INTERFACE)
+target_compile_options(raven_flags INTERFACE
+    -Wall -Wextra -Wpedantic
+    $<$<CONFIG:Debug>:-g -O0 -fsanitize=address,undefined>
+)
+target_link_options(raven_flags INTERFACE
+    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
 )
 
-target_include_directories(${PROJECT_NAME} PRIVATE src src/common)
+add_library(raven_core STATIC
+    src/instruction.c
+)
+target_include_directories(raven_core PUBLIC src src/common)
+target_link_libraries(raven_core PUBLIC raven_flags)
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -g3
-                                               -fdiagnostics-color=always)
+add_executable(raven     src/main.c)
+# add_executable(raven-dis tools/disassemble.c)
+
+target_link_libraries(raven     PRIVATE raven_core)
+# target_link_libraries(raven-dis PRIVATE raven_core)
 
 SET(TESTING OFF CACHE BOOL "compile tests")
 if (TESTING)

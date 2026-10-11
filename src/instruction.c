@@ -359,10 +359,58 @@ static enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1])
     return DR_OK;
 }
 
-enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1]);
-enum DecodeResult decode_auipc(u32 word, struct Instruction out[static 1]);
-enum DecodeResult decode_system(u32 word, struct Instruction out[static 1]);
-enum DecodeResult decode_misc_mem(u32 word, struct Instruction out[static 1]);
+static enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_U);
+
+    *out = (struct Instruction){
+        .mnemonic = OP_LUI, .rd = data.rd, .imm = data.imm};
+    return DR_OK;
+}
+
+static enum DecodeResult decode_auipc(u32 word,
+                                      struct Instruction out[static 1])
+{
+    const struct RawPayload data = read_payload(word, FMT_U);
+
+    *out = (struct Instruction){
+        .mnemonic = OP_AUIPC, .rd = data.rd, .imm = data.imm};
+    return DR_OK;
+}
+
+static enum DecodeResult decode_system(u32 word,
+                                       struct Instruction out[static 1])
+{
+    // ECALL and EBREAK are the only SYSTEM instructions in RV32I, and they
+    // have no operands, so the whole word is fixed.
+    switch (word) {
+        case 0x00000073:
+            *out = (struct Instruction){.mnemonic = OP_ECALL};
+            return DR_OK;
+        case 0x00100073:
+            *out = (struct Instruction){.mnemonic = OP_EBREAK};
+            return DR_OK;
+        default:
+            // CSR instructions (funct3 != 0) and privileged ones (MRET, WFI,
+            // ...) are legal RISC-V, just not part of RV32I
+            return DR_UNSUPPORTED;
+    }
+}
+
+static enum DecodeResult decode_misc_mem(u32 word,
+                                         struct Instruction out[static 1])
+{
+    (void)out;
+    const struct RawPayload data = read_payload(word, FMT_I);
+
+    switch (data.funct3) {
+        case 0:  // FENCE
+        case 1:  // FENCE.I (Zifencei)
+            return DR_UNSUPPORTED;
+        default:
+            return DR_BAD_FUNCT3;
+    }
+}
 
 enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
 {
@@ -387,9 +435,13 @@ enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
         case OPC_JALR:
             return decode_jalr(word, out);
         case OPC_LUI:
+            return decode_lui(word, out);
         case OPC_AUIPC:
+            return decode_auipc(word, out);
         case OPC_SYSTEM:
+            return decode_system(word, out);
         case OPC_MISC_MEM:
+            return decode_misc_mem(word, out);
         default:
             return DR_BAD_OPCODE;
     }

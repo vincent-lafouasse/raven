@@ -124,30 +124,35 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 1:
             if (data.funct7 == 0x00) {
                 m = OP_SLL;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 2:
             if (data.funct7 == 0x00) {
                 m = OP_SLT;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 3:
             if (data.funct7 == 0x00) {
                 m = OP_SLTU;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 4:
             if (data.funct7 == 0x00) {
                 m = OP_XOR;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 5:
             if (data.funct7 == 0x00) {
                 m = OP_SRL;
@@ -156,18 +161,21 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 6:
             if (data.funct7 == 0x00) {
                 m = OP_OR;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         case 7:
             if (data.funct7 == 0x00) {
                 m = OP_AND;
             } else {
                 return DR_BAD_FUNCT7;
             }
+            break;
         default:
             UNREACHABLE();
     }

@@ -1,3 +1,5 @@
+#include "types.h"
+
 enum InstructionKind {
     IK_STORE,
     IK_BRANCH,

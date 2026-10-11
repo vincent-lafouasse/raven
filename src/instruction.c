@@ -2,29 +2,6 @@
 
 #include <assert.h>
 
-enum Opcode {
-    OPC_OP = 0x33,
-    OPC_OP_IMM = 0x13,
-    OPC_LOAD = 0x03,
-    OPC_STORE = 0x23,
-    OPC_BRANCH = 0x63,
-    OPC_JAL = 0x6f,
-    OPC_JALR = 0x67,
-    OPC_LUI = 0x37,
-    OPC_AUIPC = 0x17,
-    OPC_SYSTEM = 0x73,
-    OPC_MISC_MEM = 0x0f,
-};
-
-enum Format {
-    FMT_R,
-    FMT_I,
-    FMT_S,
-    FMT_U,
-    FMT_J,
-    FMT_B,
-};
-
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
@@ -40,6 +17,15 @@ static i32 sign_extend(u32 value, u8 width)
     const u8 shift = 32 - width;
     return (i32)(value << shift) >> shift;
 }
+
+enum Format {
+    FMT_R,
+    FMT_I,
+    FMT_S,
+    FMT_U,
+    FMT_J,
+    FMT_B,
+};
 
 struct RawPayload {
     u8 rd, rs1, rs2;
@@ -105,6 +91,20 @@ static struct RawPayload read_payload(u32 word, enum Format fmt)
 
     return out;
 }
+
+enum Opcode {
+    OPC_OP = 0x33,
+    OPC_OP_IMM = 0x13,
+    OPC_LOAD = 0x03,
+    OPC_STORE = 0x23,
+    OPC_BRANCH = 0x63,
+    OPC_JAL = 0x6f,
+    OPC_JALR = 0x67,
+    OPC_LUI = 0x37,
+    OPC_AUIPC = 0x17,
+    OPC_SYSTEM = 0x73,
+    OPC_MISC_MEM = 0x0f,
+};
 
 struct Instruction decode_instruction(u32 word)
 {

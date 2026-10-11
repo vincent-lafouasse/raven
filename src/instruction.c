@@ -106,10 +106,9 @@ enum Opcode {
     OPC_MISC_MEM = 0x0f,
 };
 
-struct Instruction decode_instruction(u32 word)
+enum DecodeResult decode_instruction(u32 word, struct Instruction out[static 1])
 {
     const u32 opcode = u32_get_bits(word, 0, 6);
-    (void)opcode;
 
     switch (opcode) {
         case OPC_OP:
@@ -124,8 +123,8 @@ struct Instruction decode_instruction(u32 word)
         case OPC_SYSTEM:
         case OPC_MISC_MEM:
         default:
-            break;
+            return DR_BAD_OPCODE;
     }
 
-    return (struct Instruction){0};
+    return DR_OK;
 }

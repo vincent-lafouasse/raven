@@ -28,9 +28,11 @@ DEBUG_NINJA   := $(DEBUG_DIR)/build.ninja
 RELEASE_NINJA := $(RELEASE_DIR)/build.ninja
 
 .DEFAULT_GOAL := debug
-.PHONY: all debug release test run clean fclean re
+.PHONY: all build debug release test run clean fclean re
 
-all: debug release
+all: build
+
+build: debug release
 
 debug: $(DEBUG_NINJA)
 	$(NINJA) -C $(DEBUG_DIR) $(TARGET)
@@ -69,3 +71,9 @@ fclean:
 
 re: fclean
 	$(MAKE) debug
+
+.PHONY: b t r f
+b: build
+t: test
+r: run
+f: format

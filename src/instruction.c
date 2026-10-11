@@ -116,6 +116,12 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
     out->rs2 = data.rs2;
 
     switch (data.funct3) {
+        case 0:
+            if (0) {
+                return DR_OK;
+            } else {
+                return DR_OK;
+            }
         default:
             UNREACHABLE();
     }

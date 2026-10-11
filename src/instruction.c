@@ -112,12 +112,6 @@ enum Opcode {
 static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
 {
     const struct RawPayload data = read_payload(word, FMT_R);
-    out->rd = data.rd;
-    out->rs1 = data.rs1;
-    out->rs2 = data.rs2;
-
-    // only error path is BAD_FUNCT7
-    bool ok = true;
 
     switch (data.funct3) {
         case 0:
@@ -126,34 +120,60 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
             } else if (data.funct7 == 0x20) {
                 out->mnemonic = OP_SUB;
             } else {
-                ok = false;
+                return DR_BAD_FUNCT7;
             }
         case 1:
             if (data.funct7 == 0x00) {
                 out->mnemonic = OP_SLL;
             } else {
-                ok = false;
+                return DR_BAD_FUNCT7;
             }
         case 2:
             if (data.funct7 == 0x00) {
                 out->mnemonic = OP_SLT;
             } else {
-                ok = false;
+                return DR_BAD_FUNCT7;
             }
         case 3:
             if (data.funct7 == 0x00) {
                 out->mnemonic = OP_SLTU;
             } else {
-                ok = false;
+                return DR_BAD_FUNCT7;
+            }
+        case 4:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_XOR;
+            } else {
+                return DR_BAD_FUNCT7;
+            }
+        case 5:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_SRL;
+            } else if (data.funct7 == 0x20) {
+                out->mnemonic = OP_SRA;
+            } else {
+                return DR_BAD_FUNCT7;
+            }
+        case 6:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_OR;
+            } else {
+                return DR_BAD_FUNCT7;
+            }
+        case 7:
+            if (data.funct7 == 0x00) {
+                out->mnemonic = OP_AND;
+            } else {
+                return DR_BAD_FUNCT7;
             }
         default:
             UNREACHABLE();
     }
 
-    if (ok)
-        return DR_OK;
-    else
-        return DR_BAD_FUNCT7;
+    out->rd = data.rd;
+    out->rs1 = data.rs1;
+    out->rs2 = data.rs2;
+    return DR_OK;
 }
 
 enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);

@@ -2,6 +2,8 @@
 
 #include <assert.h>
 
+#include "utils.h"
+
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {
     assert(start <= end && end < 32);
@@ -113,7 +115,12 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
     out->rs1 = data.rs1;
     out->rs2 = data.rs2;
 
-    return DR_OK;
+    switch (data.funct3) {
+        default:
+            UNREACHABLE();
+    }
+
+    UNREACHABLE();
 }
 
 enum DecodeResult decode_op_imm(u32 word, struct Instruction out[static 1]);

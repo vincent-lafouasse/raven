@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bitcast.h"
 #include "instruction.h"
 
 static void die(const char* fmt, ...)
@@ -44,12 +45,6 @@ static struct Buffer load_bytes_or_die(const char* path)
     return (struct Buffer){.data = data, .sz = (size_t)sz};
 }
 
-static u32 read_u32_LE(const u8* data)
-{
-    return (u32)data[0] | (u32)data[1] << 8 | (u32)data[2] << 16 |
-           (u32)data[3] << 24;
-}
-
 int main(int ac, char** av)
 {
     if (ac != 2) {
@@ -61,7 +56,7 @@ int main(int ac, char** av)
 
     char line[128];
     for (size_t i = 0; i < n_words; ++i) {
-        const u32 word = read_u32_LE(buf.data + 4 * i);
+        const u32 word = bitcastU32_LE(buf.data + 4 * i);
 
         struct Instruction instr;
         if (decode_instruction(word, &instr) == DR_OK) {

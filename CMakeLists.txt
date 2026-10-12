@@ -44,7 +44,7 @@ add_executable(raven     src/main.c)
 add_executable(raven-dis tools/disassemble.c)
 
 target_link_libraries(raven     PRIVATE raven_core)
-target_link_libraries(raven-dis PRIVATE raven_core)
+target_link_libraries(raven-dis PRIVATE raven_core bitcast::bitcast)
 
 SET(TESTING OFF CACHE BOOL "compile tests")
 if (TESTING)

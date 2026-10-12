@@ -1,12 +1,9 @@
 #include <stdarg.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "instruction.h"
-
-typedef uint8_t u8;
 
 static void die(const char* fmt, ...)
 {
@@ -44,12 +41,7 @@ struct Buffer load_bytes_or_die(const char* path)
     return (struct Buffer){.data = data, .sz = (size_t)sz};
 }
 
-struct Io {
-    FILE* in;
-    FILE* out;
-};
-
-struct Io io_open_or_die(const char* infile)
+FILE* open_outfile_or_die(const char* infile)
 {
     const char* suffix = ".s";
     const size_t outfile_path_len = strlen(infile) + strlen(suffix);
@@ -61,24 +53,13 @@ struct Io io_open_or_die(const char* infile)
     strcat(outfile_path, infile);
     strcat(outfile_path, suffix);
 
-    FILE* in = fopen(infile, "rb");
-    if (in == NULL) {
-        die("Failed to open file %s", infile);
-    }
-
     FILE* out = fopen(outfile_path, "wb");
     if (out == NULL) {
         die("Failed to open file %s", outfile_path);
     }
 
     free(outfile_path);
-    return (struct Io){.in = in, .out = out};
-}
-
-void io_close(struct Io io[static 1])
-{
-    fclose(io->in);
-    fclose(io->out);
+    return out;
 }
 
 int main(int ac, char** av)
@@ -87,8 +68,10 @@ int main(int ac, char** av)
         die("Usage: %s program.bin\n", av[0]);
     }
 
-    struct Io io = io_open_or_die(av[1]);
+    struct Buffer data = load_bytes_or_die(av[1]);
+    FILE* outfile = open_outfile_or_die(av[1]);
 
-    io_close(&io);
+    fclose(outfile);
+    free(data.data);
     return 0;
 }

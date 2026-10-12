@@ -2,6 +2,17 @@
 
 #include "instruction.h"
 
+static void die(const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    fputs("raven-dis: ", stderr);
+    vfprintf(stderr, fmt, ap);
+    fputc('\n', stderr);
+    va_end(ap);
+    exit(EXIT_FAILURE);
+}
+
 struct Io {
     FILE* in;
     FILE* out;

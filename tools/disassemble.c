@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "instruction.h"
 
@@ -22,7 +23,17 @@ struct Io {
 
 struct Io io_open_or_die(const char* infile)
 {
-    (void)infile;
+    const char* suffix = ".s";
+    const size_t outfile_path_len = strlen(infile) + strlen(suffix);
+    char* outfile_path = calloc(1, outfile_path_len + 1);
+    if (outfile_path == NULL) {
+        die("OOM");
+    }
+
+    strcat(outfile_path, infile);
+    strcat(outfile_path, suffix);
+
+    free(outfile_path);
     return (struct Io){0};
 }
 

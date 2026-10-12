@@ -23,6 +23,7 @@ add_library(raven_core STATIC
     src/format_instruction.c
     src/cpu.c
     src/bus.c
+    src/loader.c
 )
 target_include_directories(raven_core PUBLIC src src/common)
 target_link_libraries(raven_core PUBLIC raven_flags)

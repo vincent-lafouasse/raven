@@ -74,3 +74,5 @@ enum DecodeResult {
 
 enum DecodeResult decode_instruction(u32 word,
                                      struct Instruction out[static 1]);
+
+void format_instruction(struct Instruction instr, char out[static 128]);

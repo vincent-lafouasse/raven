@@ -41,27 +41,6 @@ struct Buffer load_bytes_or_die(const char* path)
     return (struct Buffer){.data = data, .sz = (size_t)sz};
 }
 
-FILE* open_outfile_or_die(const char* infile)
-{
-    const char* suffix = ".s";
-    const size_t outfile_path_len = strlen(infile) + strlen(suffix);
-    char* outfile_path = calloc(1, outfile_path_len + 1);
-    if (outfile_path == NULL) {
-        die("OOM");
-    }
-
-    strcat(outfile_path, infile);
-    strcat(outfile_path, suffix);
-
-    FILE* out = fopen(outfile_path, "wb");
-    if (out == NULL) {
-        die("Failed to open file %s", outfile_path);
-    }
-
-    free(outfile_path);
-    return out;
-}
-
 u32 read_u32_LE(const u8* data)
 {
     return (u32)data[0] | (u32)data[1] << 8 | (u32)data[2] << 16 |
@@ -75,9 +54,7 @@ int main(int ac, char** av)
     }
 
     struct Buffer data = load_bytes_or_die(av[1]);
-    FILE* outfile = open_outfile_or_die(av[1]);
 
-    fclose(outfile);
     free(data.data);
     return 0;
 }

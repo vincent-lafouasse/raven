@@ -1,4 +1,6 @@
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "instruction.h"
 
@@ -33,8 +35,7 @@ void io_close(struct Io io[static 1])
 int main(int ac, char** av)
 {
     if (ac != 2) {
-        fprintf(stderr, "Usage: %s program.bin\n", av[0]);
-        return 1;
+        die("Usage: %s program.bin\n", av[0]);
     }
 
     struct Io io = io_open_or_die(av[1]);

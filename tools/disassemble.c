@@ -1,9 +1,12 @@
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "instruction.h"
+
+typedef uint8_t u8;
 
 static void die(const char* fmt, ...)
 {
@@ -14,6 +17,31 @@ static void die(const char* fmt, ...)
     fputc('\n', stderr);
     va_end(ap);
     exit(EXIT_FAILURE);
+}
+
+struct Buffer {
+    u8* data;
+    size_t sz;
+};
+
+struct Buffer load_bytes_or_die(const char* path)
+{
+    FILE* f = fopen(path, "rb");
+    if (!f) {
+        die("cannot open %s", path);
+    }
+
+    fseek(f, 0, SEEK_END);
+    long sz = ftell(f);
+    rewind(f);
+
+    u8* data = malloc(sz);
+    if (!data || fread(data, 1, sz, f) != (size_t)sz) {
+        die("cannot read %s", path);
+    }
+
+    fclose(f);
+    return (struct Buffer){.data = data, .sz = (size_t)sz};
 }
 
 struct Io {

@@ -11,7 +11,9 @@
 #define RAM_BASE 0x80000000u
 #define RAM_SIZE (1u << 20)  // 1 MiB
 
-struct Bus {};
+struct Bus {
+    u8 ram[RAM_SIZE];
+};
 
 enum BusStatus { BUS_OK, BUS_UNMAPPED, BUS_MISALIGNED };
 

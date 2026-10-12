@@ -1,5 +1,7 @@
 #include "instruction.h"
 
+#include <stdio.h>
+
 enum OperandForm {
     OPF_REG_REG,
     OPF_REG_IMM,

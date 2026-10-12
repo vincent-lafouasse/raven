@@ -11,6 +11,7 @@ enum OperandForm {
     OPF_UPPER_IMM,
     OPF_JUMP,
     OPF_NONE,
+    OPF_FENCE,
 };
 
 static const struct {
@@ -67,7 +68,53 @@ static const struct {
     // system
     [OP_ECALL] = {"ecall", OPF_NONE},
     [OP_EBREAK] = {"ebreak", OPF_NONE},
+
+    // memory ordering
+    [OP_FENCE] = {"fence", OPF_FENCE},
 };
+
+// writes a fence predecessor/successor set as a subset of "iorw"
+static void format_fence_set(unsigned set, char out[static 5])
+{
+    const char* letters = "iorw";
+    size_t n = 0;
+
+    for (unsigned i = 0; i < 4; ++i) {
+        if (set & (0x8u >> i)) {
+            out[n++] = letters[i];
+        }
+    }
+    out[n] = '\0';
+}
+
+static void format_fence(struct Instruction instr, char out[static 128])
+{
+    const unsigned fm = ((unsigned)instr.imm >> 8) & 0xf;
+    const unsigned pred = ((unsigned)instr.imm >> 4) & 0xf;
+    const unsigned succ = (unsigned)instr.imm & 0xf;
+
+    if (instr.rd == 0 && instr.rs1 == 0) {
+        if (fm == 0x8 && pred == 0x3 && succ == 0x3) {
+            snprintf(out, 128, "fence.tso");
+            return;
+        }
+        if (fm == 0 && pred != 0 && succ != 0) {
+            char p[5], q[5];
+            format_fence_set(pred, p);
+            format_fence_set(succ, q);
+            snprintf(out, 128, "fence %s, %s", p, q);
+            return;
+        }
+    }
+
+    // anything else (reserved fm, empty sets such as PAUSE, nonzero rd/rs1)
+    // has no portable assembly syntax: rebuild the word so the output still
+    // reassembles to the same bytes
+    const unsigned word = ((unsigned)instr.imm & 0xfffu) << 20 |
+                          (unsigned)instr.rs1 << 15 | (unsigned)instr.rd << 7 |
+                          0x0fu;
+    snprintf(out, 128, ".word 0x%08x", word);
+}
 
 void format_instruction(struct Instruction instr, char out[static 128])
 {
@@ -106,6 +153,9 @@ void format_instruction(struct Instruction instr, char out[static 128])
             break;
         case OPF_NONE:
             snprintf(out, 128, "%s", name);
+            break;
+        case OPF_FENCE:
+            format_fence(instr, out);
             break;
     }
 }

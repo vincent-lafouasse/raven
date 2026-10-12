@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,6 +6,7 @@
 
 #include "bus.h"
 #include "cpu.h"
+#include "instruction.h"
 #include "loader.h"
 
 #define USAGE                           \
@@ -71,7 +73,15 @@ int main(int ac, char** av)
     struct Cpu cpu;
     cpu_reset(&cpu, entry);
 
-    // TODO: run loop
+    u32 raw_instruction;
+    assert(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
+
+    struct Instruction instruction;
+    assert(decode_instruction(raw_instruction, &instruction) == DR_OK);
+
+    char str[128] = {0};
+    format_instruction(instruction, str);
+    printf("%s\n", str);
 
     free(bus);
     return EXIT_SUCCESS;

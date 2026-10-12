@@ -400,11 +400,20 @@ static enum DecodeResult decode_system(u32 word,
 static enum DecodeResult decode_misc_mem(u32 word,
                                          struct Instruction out[static 1])
 {
-    (void)out;
     const struct RawPayload data = read_payload(word, FMT_I);
 
     switch (data.funct3) {
-        case 0:  // FENCE
+        case 0:
+            // rd and rs1 are reserved and ignored. Every fm value decodes:
+            // 1000 is FENCE.TSO, the others are reserved and behave as a
+            // normal FENCE.
+            *out = (struct Instruction){
+                .mnemonic = OP_FENCE,
+                .rd = data.rd,
+                .rs1 = data.rs1,
+                .imm = (i32)u32_get_bits(word, 20, 31),
+            };
+            return DR_OK;
         case 1:  // FENCE.I (Zifencei)
             return DR_UNSUPPORTED;
         default:

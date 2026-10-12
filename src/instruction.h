@@ -53,6 +53,11 @@ enum Mnemonic {
     // system
     OP_ECALL,
     OP_EBREAK,
+
+    // memory ordering
+    // imm holds the raw, zero-extended bits 31:20: fm (11:8), pred (7:4),
+    // succ (3:0), each set ordered i, o, r, w from msb to lsb
+    OP_FENCE,
 };
 
 struct Instruction {

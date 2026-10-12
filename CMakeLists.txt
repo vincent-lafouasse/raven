@@ -21,6 +21,7 @@ target_link_options(raven_flags INTERFACE
 add_library(raven_core STATIC
     src/instruction.c
     src/format_instruction.c
+    src/cpu.c
     src/bus.c
 )
 target_include_directories(raven_core PUBLIC src src/common)

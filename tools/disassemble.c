@@ -62,6 +62,12 @@ FILE* open_outfile_or_die(const char* infile)
     return out;
 }
 
+u32 read_u32_LE(const u8* data)
+{
+    return (u32)data[0] | (u32)data[1] << 8 | (u32)data[2] << 16 |
+           (u32)data[3] << 24;
+}
+
 int main(int ac, char** av)
 {
     if (ac != 2) {

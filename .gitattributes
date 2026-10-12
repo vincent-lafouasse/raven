@@ -1,1 +1,4 @@
 ./third_party/* linguist-vendored
+
+# codegen'd
+./test/decoder-test/test.s linguist-vendored

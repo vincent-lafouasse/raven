@@ -32,6 +32,14 @@ add_library(raven_core STATIC
 target_include_directories(raven_core PUBLIC src src/common)
 target_link_libraries(raven_core PUBLIC raven_flags)
 
+include(FetchContent)
+FetchContent_Declare(bitcast
+    GIT_REPOSITORY https://github.com/vincent-lafouasse/libbitcast.git
+    GIT_TAG        1.0.1
+)
+FetchContent_MakeAvailable(bitcast)
+target_link_libraries(raven_core PRIVATE bitcast::bitcast)
+
 add_executable(raven     src/main.c)
 add_executable(raven-dis tools/disassemble.c)
 

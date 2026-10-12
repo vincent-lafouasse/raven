@@ -33,8 +33,18 @@ struct Io io_open_or_die(const char* infile)
     strcat(outfile_path, infile);
     strcat(outfile_path, suffix);
 
+    FILE* in = fopen(infile, "rb");
+    if (in == NULL) {
+        die("Failed to open file %s", infile);
+    }
+
+    FILE* out = fopen(outfile_path, "wb");
+    if (out == NULL) {
+        die("Failed to open file %s", outfile_path);
+    }
+
     free(outfile_path);
-    return (struct Io){0};
+    return (struct Io){.in = in, .out = out};
 }
 
 void io_close(struct Io io[static 1])

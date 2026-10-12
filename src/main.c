@@ -45,13 +45,16 @@ int main(int ac, char** av)
         die(USAGE);
     }
 
+    const char* const flag = av[1];
+    const char* const binary_path = av[2];
+
     enum LoadStatus (*load)(struct Bus*, const char*, u32*);
-    if (strcmp(av[1], "--flat") == 0) {
+    if (strcmp(flag, "--flat") == 0) {
         load = load_flat;
-    } else if (strcmp(av[1], "--elf") == 0) {
+    } else if (strcmp(flag, "--elf") == 0) {
         load = load_elf;
     } else {
-        die("unknown option %s\n" USAGE, av[1]);
+        die("unknown option %s\n" USAGE, flag);
     }
 
     struct Bus* bus = calloc(1, sizeof(*bus));
@@ -60,9 +63,9 @@ int main(int ac, char** av)
     }
 
     u32 entry;
-    const enum LoadStatus status = load(bus, av[2], &entry);
+    const enum LoadStatus status = load(bus, binary_path, &entry);
     if (status != LOAD_OK) {
-        die("%s: %s", av[2], load_status_str(status));
+        die("%s: %s", binary_path, load_status_str(status));
     }
 
     struct Cpu cpu;

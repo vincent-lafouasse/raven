@@ -39,3 +39,5 @@ struct Cpu {
     u32 x[32];
     u32 pc;
 };
+
+void cpu_reset(struct Cpu cpu[static 1], u32 entry);

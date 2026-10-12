@@ -54,6 +54,7 @@ int main(int ac, char** av)
     }
 
     struct Buffer data = load_bytes_or_die(av[1]);
+    data.sz /= 4; // count u32s not bytes
 
     free(data.data);
     return 0;

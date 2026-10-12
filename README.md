@@ -12,3 +12,13 @@ makes QEMU a reference to compare against.
 - ISA: RV32I (unprivileged base integer ISA only). No CSRs, no privilege
   modes, no traps. `fence` is a no-op.
 - One hart. All registers start at 0, `pc` starts at the entry point.
+
+### Memory map
+
+| Address      | Size  | Device | Status  |
+|--------------|-------|--------|---------|
+| `0x80000000` | 1 MiB | RAM    | planned |
+| `0x10000000` |       | UART   | later   |
+
+Any access outside a mapped region, or a misaligned access, stops the
+machine with an error.

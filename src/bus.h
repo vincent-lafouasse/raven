@@ -2,7 +2,14 @@
 
 #include "types.h"
 
-// TODO: document the memory map
+// Memory map, a subset of QEMU's `virt` machine (hw/riscv/virt.c, virt_memmap)
+//
+//   0x80000000 .. 0x800fffff   RAM (1 MiB)
+//
+// Anything else is unmapped.
+
+#define RAM_BASE 0x80000000u
+#define RAM_SIZE (1u << 20)  // 1 MiB
 
 struct Bus {};
 

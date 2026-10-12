@@ -1,0 +1,8 @@
+Vendored from https://github.com/riscv-software-src/riscv-tests
+commit 7b68f7b91f827f8d94cc1c57ff123752c5c8f704 (2026-10-09)
+
+Only isa/rv32ui, the isa/rv64ui bodies those files include, and
+isa/macros/scalar/test_macros.h are kept, in their original layout so the
+relative includes still resolve. Files are unmodified. See LICENSE.
+
+riscv_test.h (the environment) is not vendored: raven provides its own.

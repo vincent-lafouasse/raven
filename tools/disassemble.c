@@ -53,7 +53,7 @@ static u32 read_u32_LE(const u8* data)
 int main(int ac, char** av)
 {
     if (ac != 2) {
-        die("Usage: %s program.bin\n", av[0]);
+        die("Usage: %s program.bin", av[0]);
     }
 
     struct Buffer data = load_bytes_or_die(av[1]);

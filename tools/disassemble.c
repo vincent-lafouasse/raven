@@ -56,6 +56,9 @@ int main(int ac, char** av)
     struct Buffer data = load_bytes_or_die(av[1]);
     data.sz /= 4; // count u32s not bytes
 
+    const u32 word = read_u32_LE(data.data);
+    printf("0x%x\n", word);
+
     free(data.data);
     return 0;
 }

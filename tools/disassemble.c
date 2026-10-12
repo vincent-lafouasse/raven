@@ -30,9 +30,12 @@ static struct Buffer load_bytes_or_die(const char* path)
 
     fseek(f, 0, SEEK_END);
     long sz = ftell(f);
+    if (sz < 0) {
+        die("cannot read %s", path);
+    }
     rewind(f);
 
-    u8* data = malloc(sz);
+    u8* data = malloc(sz > 0 ? (size_t)sz : 1);
     if (!data || fread(data, 1, sz, f) != (size_t)sz) {
         die("cannot read %s", path);
     }

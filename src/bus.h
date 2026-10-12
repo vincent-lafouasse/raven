@@ -4,6 +4,8 @@
 
 // TODO: document the memory map
 
+struct Bus {};
+
 enum BusStatus { BUS_OK, BUS_UNMAPPED, BUS_MISALIGNED };
 
 enum BusStatus bus_read(struct Bus bus[static 1],

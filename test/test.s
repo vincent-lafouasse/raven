@@ -4,9 +4,6 @@
     .text
     .balign 4
 
-# padding so pc-relative targets stay inside the section
-    .fill 262144, 4, 0x00000013    # nops
-
 # --- R-type ---
     add x0, x21, x10
     add x5, x0, x10
@@ -927,18 +924,13 @@
 
 # --- branches ---
     beq x21, x10, .+0
-    beq x21, x10, .+4094
+    beq x21, x10, .+126
     beq x21, x10, .+2
     beq x21, x10, .+4
     beq x21, x10, .+8
     beq x21, x10, .+16
     beq x21, x10, .+32
     beq x21, x10, .+64
-    beq x21, x10, .+128
-    beq x21, x10, .+256
-    beq x21, x10, .+512
-    beq x21, x10, .+1024
-    beq x21, x10, .+2048
     beq x21, x10, .-2
     beq x21, x10, .-4
     beq x21, x10, .-8
@@ -946,48 +938,33 @@
     beq x21, x10, .-32
     beq x21, x10, .-64
     beq x21, x10, .-128
-    beq x21, x10, .-256
-    beq x21, x10, .-512
-    beq x21, x10, .-1024
-    beq x21, x10, .-2048
-    beq x21, x10, .-4096
     beq x21, x10, .-6
     beq x21, x10, .-10
     beq x21, x10, .-18
     beq x21, x10, .-34
     beq x21, x10, .-66
-    beq x21, x10, .-130
-    beq x21, x10, .-258
-    beq x21, x10, .-514
-    beq x21, x10, .-1026
-    beq x21, x10, .-2050
-    beq x0, x10, .+1366
-    beq x21, x0, .+1366
-    beq x1, x10, .+1366
-    beq x21, x1, .+1366
-    beq x2, x10, .+1366
-    beq x21, x2, .+1366
-    beq x4, x10, .+1366
-    beq x21, x4, .+1366
-    beq x8, x10, .+1366
-    beq x21, x8, .+1366
-    beq x16, x10, .+1366
-    beq x21, x16, .+1366
-    beq x31, x10, .+1366
-    beq x21, x31, .+1366
+    beq x0, x10, .+86
+    beq x21, x0, .+86
+    beq x1, x10, .+86
+    beq x21, x1, .+86
+    beq x2, x10, .+86
+    beq x21, x2, .+86
+    beq x4, x10, .+86
+    beq x21, x4, .+86
+    beq x8, x10, .+86
+    beq x21, x8, .+86
+    beq x16, x10, .+86
+    beq x21, x16, .+86
+    beq x31, x10, .+86
+    beq x21, x31, .+86
     bne x21, x10, .+0
-    bne x21, x10, .+4094
+    bne x21, x10, .+126
     bne x21, x10, .+2
     bne x21, x10, .+4
     bne x21, x10, .+8
     bne x21, x10, .+16
     bne x21, x10, .+32
     bne x21, x10, .+64
-    bne x21, x10, .+128
-    bne x21, x10, .+256
-    bne x21, x10, .+512
-    bne x21, x10, .+1024
-    bne x21, x10, .+2048
     bne x21, x10, .-2
     bne x21, x10, .-4
     bne x21, x10, .-8
@@ -995,48 +972,33 @@
     bne x21, x10, .-32
     bne x21, x10, .-64
     bne x21, x10, .-128
-    bne x21, x10, .-256
-    bne x21, x10, .-512
-    bne x21, x10, .-1024
-    bne x21, x10, .-2048
-    bne x21, x10, .-4096
     bne x21, x10, .-6
     bne x21, x10, .-10
     bne x21, x10, .-18
     bne x21, x10, .-34
     bne x21, x10, .-66
-    bne x21, x10, .-130
-    bne x21, x10, .-258
-    bne x21, x10, .-514
-    bne x21, x10, .-1026
-    bne x21, x10, .-2050
-    bne x0, x10, .+1366
-    bne x21, x0, .+1366
-    bne x1, x10, .+1366
-    bne x21, x1, .+1366
-    bne x2, x10, .+1366
-    bne x21, x2, .+1366
-    bne x4, x10, .+1366
-    bne x21, x4, .+1366
-    bne x8, x10, .+1366
-    bne x21, x8, .+1366
-    bne x16, x10, .+1366
-    bne x21, x16, .+1366
-    bne x31, x10, .+1366
-    bne x21, x31, .+1366
+    bne x0, x10, .+86
+    bne x21, x0, .+86
+    bne x1, x10, .+86
+    bne x21, x1, .+86
+    bne x2, x10, .+86
+    bne x21, x2, .+86
+    bne x4, x10, .+86
+    bne x21, x4, .+86
+    bne x8, x10, .+86
+    bne x21, x8, .+86
+    bne x16, x10, .+86
+    bne x21, x16, .+86
+    bne x31, x10, .+86
+    bne x21, x31, .+86
     blt x21, x10, .+0
-    blt x21, x10, .+4094
+    blt x21, x10, .+126
     blt x21, x10, .+2
     blt x21, x10, .+4
     blt x21, x10, .+8
     blt x21, x10, .+16
     blt x21, x10, .+32
     blt x21, x10, .+64
-    blt x21, x10, .+128
-    blt x21, x10, .+256
-    blt x21, x10, .+512
-    blt x21, x10, .+1024
-    blt x21, x10, .+2048
     blt x21, x10, .-2
     blt x21, x10, .-4
     blt x21, x10, .-8
@@ -1044,48 +1006,33 @@
     blt x21, x10, .-32
     blt x21, x10, .-64
     blt x21, x10, .-128
-    blt x21, x10, .-256
-    blt x21, x10, .-512
-    blt x21, x10, .-1024
-    blt x21, x10, .-2048
-    blt x21, x10, .-4096
     blt x21, x10, .-6
     blt x21, x10, .-10
     blt x21, x10, .-18
     blt x21, x10, .-34
     blt x21, x10, .-66
-    blt x21, x10, .-130
-    blt x21, x10, .-258
-    blt x21, x10, .-514
-    blt x21, x10, .-1026
-    blt x21, x10, .-2050
-    blt x0, x10, .+1366
-    blt x21, x0, .+1366
-    blt x1, x10, .+1366
-    blt x21, x1, .+1366
-    blt x2, x10, .+1366
-    blt x21, x2, .+1366
-    blt x4, x10, .+1366
-    blt x21, x4, .+1366
-    blt x8, x10, .+1366
-    blt x21, x8, .+1366
-    blt x16, x10, .+1366
-    blt x21, x16, .+1366
-    blt x31, x10, .+1366
-    blt x21, x31, .+1366
+    blt x0, x10, .+86
+    blt x21, x0, .+86
+    blt x1, x10, .+86
+    blt x21, x1, .+86
+    blt x2, x10, .+86
+    blt x21, x2, .+86
+    blt x4, x10, .+86
+    blt x21, x4, .+86
+    blt x8, x10, .+86
+    blt x21, x8, .+86
+    blt x16, x10, .+86
+    blt x21, x16, .+86
+    blt x31, x10, .+86
+    blt x21, x31, .+86
     bge x21, x10, .+0
-    bge x21, x10, .+4094
+    bge x21, x10, .+126
     bge x21, x10, .+2
     bge x21, x10, .+4
     bge x21, x10, .+8
     bge x21, x10, .+16
     bge x21, x10, .+32
     bge x21, x10, .+64
-    bge x21, x10, .+128
-    bge x21, x10, .+256
-    bge x21, x10, .+512
-    bge x21, x10, .+1024
-    bge x21, x10, .+2048
     bge x21, x10, .-2
     bge x21, x10, .-4
     bge x21, x10, .-8
@@ -1093,48 +1040,33 @@
     bge x21, x10, .-32
     bge x21, x10, .-64
     bge x21, x10, .-128
-    bge x21, x10, .-256
-    bge x21, x10, .-512
-    bge x21, x10, .-1024
-    bge x21, x10, .-2048
-    bge x21, x10, .-4096
     bge x21, x10, .-6
     bge x21, x10, .-10
     bge x21, x10, .-18
     bge x21, x10, .-34
     bge x21, x10, .-66
-    bge x21, x10, .-130
-    bge x21, x10, .-258
-    bge x21, x10, .-514
-    bge x21, x10, .-1026
-    bge x21, x10, .-2050
-    bge x0, x10, .+1366
-    bge x21, x0, .+1366
-    bge x1, x10, .+1366
-    bge x21, x1, .+1366
-    bge x2, x10, .+1366
-    bge x21, x2, .+1366
-    bge x4, x10, .+1366
-    bge x21, x4, .+1366
-    bge x8, x10, .+1366
-    bge x21, x8, .+1366
-    bge x16, x10, .+1366
-    bge x21, x16, .+1366
-    bge x31, x10, .+1366
-    bge x21, x31, .+1366
+    bge x0, x10, .+86
+    bge x21, x0, .+86
+    bge x1, x10, .+86
+    bge x21, x1, .+86
+    bge x2, x10, .+86
+    bge x21, x2, .+86
+    bge x4, x10, .+86
+    bge x21, x4, .+86
+    bge x8, x10, .+86
+    bge x21, x8, .+86
+    bge x16, x10, .+86
+    bge x21, x16, .+86
+    bge x31, x10, .+86
+    bge x21, x31, .+86
     bltu x21, x10, .+0
-    bltu x21, x10, .+4094
+    bltu x21, x10, .+126
     bltu x21, x10, .+2
     bltu x21, x10, .+4
     bltu x21, x10, .+8
     bltu x21, x10, .+16
     bltu x21, x10, .+32
     bltu x21, x10, .+64
-    bltu x21, x10, .+128
-    bltu x21, x10, .+256
-    bltu x21, x10, .+512
-    bltu x21, x10, .+1024
-    bltu x21, x10, .+2048
     bltu x21, x10, .-2
     bltu x21, x10, .-4
     bltu x21, x10, .-8
@@ -1142,48 +1074,33 @@
     bltu x21, x10, .-32
     bltu x21, x10, .-64
     bltu x21, x10, .-128
-    bltu x21, x10, .-256
-    bltu x21, x10, .-512
-    bltu x21, x10, .-1024
-    bltu x21, x10, .-2048
-    bltu x21, x10, .-4096
     bltu x21, x10, .-6
     bltu x21, x10, .-10
     bltu x21, x10, .-18
     bltu x21, x10, .-34
     bltu x21, x10, .-66
-    bltu x21, x10, .-130
-    bltu x21, x10, .-258
-    bltu x21, x10, .-514
-    bltu x21, x10, .-1026
-    bltu x21, x10, .-2050
-    bltu x0, x10, .+1366
-    bltu x21, x0, .+1366
-    bltu x1, x10, .+1366
-    bltu x21, x1, .+1366
-    bltu x2, x10, .+1366
-    bltu x21, x2, .+1366
-    bltu x4, x10, .+1366
-    bltu x21, x4, .+1366
-    bltu x8, x10, .+1366
-    bltu x21, x8, .+1366
-    bltu x16, x10, .+1366
-    bltu x21, x16, .+1366
-    bltu x31, x10, .+1366
-    bltu x21, x31, .+1366
+    bltu x0, x10, .+86
+    bltu x21, x0, .+86
+    bltu x1, x10, .+86
+    bltu x21, x1, .+86
+    bltu x2, x10, .+86
+    bltu x21, x2, .+86
+    bltu x4, x10, .+86
+    bltu x21, x4, .+86
+    bltu x8, x10, .+86
+    bltu x21, x8, .+86
+    bltu x16, x10, .+86
+    bltu x21, x16, .+86
+    bltu x31, x10, .+86
+    bltu x21, x31, .+86
     bgeu x21, x10, .+0
-    bgeu x21, x10, .+4094
+    bgeu x21, x10, .+126
     bgeu x21, x10, .+2
     bgeu x21, x10, .+4
     bgeu x21, x10, .+8
     bgeu x21, x10, .+16
     bgeu x21, x10, .+32
     bgeu x21, x10, .+64
-    bgeu x21, x10, .+128
-    bgeu x21, x10, .+256
-    bgeu x21, x10, .+512
-    bgeu x21, x10, .+1024
-    bgeu x21, x10, .+2048
     bgeu x21, x10, .-2
     bgeu x21, x10, .-4
     bgeu x21, x10, .-8
@@ -1191,58 +1108,35 @@
     bgeu x21, x10, .-32
     bgeu x21, x10, .-64
     bgeu x21, x10, .-128
-    bgeu x21, x10, .-256
-    bgeu x21, x10, .-512
-    bgeu x21, x10, .-1024
-    bgeu x21, x10, .-2048
-    bgeu x21, x10, .-4096
     bgeu x21, x10, .-6
     bgeu x21, x10, .-10
     bgeu x21, x10, .-18
     bgeu x21, x10, .-34
     bgeu x21, x10, .-66
-    bgeu x21, x10, .-130
-    bgeu x21, x10, .-258
-    bgeu x21, x10, .-514
-    bgeu x21, x10, .-1026
-    bgeu x21, x10, .-2050
-    bgeu x0, x10, .+1366
-    bgeu x21, x0, .+1366
-    bgeu x1, x10, .+1366
-    bgeu x21, x1, .+1366
-    bgeu x2, x10, .+1366
-    bgeu x21, x2, .+1366
-    bgeu x4, x10, .+1366
-    bgeu x21, x4, .+1366
-    bgeu x8, x10, .+1366
-    bgeu x21, x8, .+1366
-    bgeu x16, x10, .+1366
-    bgeu x21, x16, .+1366
-    bgeu x31, x10, .+1366
-    bgeu x21, x31, .+1366
+    bgeu x0, x10, .+86
+    bgeu x21, x0, .+86
+    bgeu x1, x10, .+86
+    bgeu x21, x1, .+86
+    bgeu x2, x10, .+86
+    bgeu x21, x2, .+86
+    bgeu x4, x10, .+86
+    bgeu x21, x4, .+86
+    bgeu x8, x10, .+86
+    bgeu x21, x8, .+86
+    bgeu x16, x10, .+86
+    bgeu x21, x16, .+86
+    bgeu x31, x10, .+86
+    bgeu x21, x31, .+86
 
 # --- jal ---
     jal x5, .+0
-    jal x5, .+1048574
+    jal x5, .+126
     jal x5, .+2
     jal x5, .+4
     jal x5, .+8
     jal x5, .+16
     jal x5, .+32
     jal x5, .+64
-    jal x5, .+128
-    jal x5, .+256
-    jal x5, .+512
-    jal x5, .+1024
-    jal x5, .+2048
-    jal x5, .+4096
-    jal x5, .+8192
-    jal x5, .+16384
-    jal x5, .+32768
-    jal x5, .+65536
-    jal x5, .+131072
-    jal x5, .+262144
-    jal x5, .+524288
     jal x5, .-2
     jal x5, .-4
     jal x5, .-8
@@ -1250,44 +1144,18 @@
     jal x5, .-32
     jal x5, .-64
     jal x5, .-128
-    jal x5, .-256
-    jal x5, .-512
-    jal x5, .-1024
-    jal x5, .-2048
-    jal x5, .-4096
-    jal x5, .-8192
-    jal x5, .-16384
-    jal x5, .-32768
-    jal x5, .-65536
-    jal x5, .-131072
-    jal x5, .-262144
-    jal x5, .-524288
-    jal x5, .-1048576
     jal x5, .-6
     jal x5, .-10
     jal x5, .-18
     jal x5, .-34
     jal x5, .-66
-    jal x5, .-130
-    jal x5, .-258
-    jal x5, .-514
-    jal x5, .-1026
-    jal x5, .-2050
-    jal x5, .-4098
-    jal x5, .-8194
-    jal x5, .-16386
-    jal x5, .-32770
-    jal x5, .-65538
-    jal x5, .-131074
-    jal x5, .-262146
-    jal x5, .-524290
-    jal x0, .+349524
-    jal x1, .+349524
-    jal x2, .+349524
-    jal x4, .+349524
-    jal x8, .+349524
-    jal x16, .+349524
-    jal x31, .+349524
+    jal x0, .+86
+    jal x1, .+86
+    jal x2, .+86
+    jal x4, .+86
+    jal x8, .+86
+    jal x16, .+86
+    jal x31, .+86
 
 # --- jalr ---
     jalr x5, 0(x21)
@@ -1434,6 +1302,3 @@
 # --- system ---
     ecall
     ebreak
-
-# padding
-    .fill 262144, 4, 0x00000013    # nops

@@ -56,12 +56,28 @@ int main(int ac, char** av)
         die("Usage: %s program.bin", av[0]);
     }
 
-    struct Buffer data = load_bytes_or_die(av[1]);
-    data.sz /= 4;  // count u32s not bytes
+    const struct Buffer buf = load_bytes_or_die(av[1]);
+    const size_t n_words = buf.sz / 4;
 
-    const u32 word = read_u32_LE(data.data);
-    printf("0x%x\n", word);
+    char line[128];
+    for (size_t i = 0; i < n_words; ++i) {
+        const u32 word = read_u32_LE(buf.data + 4 * i);
 
-    free(data.data);
+        struct Instruction instr;
+        if (decode_instruction(word, &instr) == DR_OK) {
+            format_instruction(instr, line);
+            printf("    %s\n", line);
+        } else {
+            // keep the output reassemblable, byte for byte
+            printf("    .word 0x%08x\n", word);
+        }
+    }
+
+    // trailing bytes that don't make a full word
+    for (size_t i = 4 * n_words; i < buf.sz; ++i) {
+        printf("    .byte 0x%02x\n", buf.data[i]);
+    }
+
+    free(buf.data);
     return 0;
 }

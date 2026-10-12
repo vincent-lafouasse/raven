@@ -21,7 +21,7 @@ struct Buffer {
     size_t sz;
 };
 
-struct Buffer load_bytes_or_die(const char* path)
+static struct Buffer load_bytes_or_die(const char* path)
 {
     FILE* f = fopen(path, "rb");
     if (!f) {
@@ -41,7 +41,7 @@ struct Buffer load_bytes_or_die(const char* path)
     return (struct Buffer){.data = data, .sz = (size_t)sz};
 }
 
-u32 read_u32_LE(const u8* data)
+static u32 read_u32_LE(const u8* data)
 {
     return (u32)data[0] | (u32)data[1] << 8 | (u32)data[2] << 16 |
            (u32)data[3] << 24;

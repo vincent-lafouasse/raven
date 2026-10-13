@@ -56,7 +56,7 @@ int main(int ac, char** av)
     const struct Buffer buf = load_bytes_or_die(av[1]);
     const size_t n_words = buf.sz / 4;
 
-    char line[128];
+    char line[INSTRUCTION_STR_LEN];
     for (size_t i = 0; i < n_words; ++i) {
         const u32 word = bitcastU32_LE(buf.data + 4 * i);
 

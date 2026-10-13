@@ -87,7 +87,8 @@ static void format_fence_set(unsigned set, char out[static 5])
     out[n] = '\0';
 }
 
-static void format_fence(struct Instruction instr, char out[static 128])
+static void format_fence(struct Instruction instr,
+                         char out[static INSTRUCTION_STR_LEN])
 {
     const unsigned fm = ((unsigned)instr.imm >> 8) & 0xf;
     const unsigned pred = ((unsigned)instr.imm >> 4) & 0xf;
@@ -95,14 +96,14 @@ static void format_fence(struct Instruction instr, char out[static 128])
 
     if (instr.rd == 0 && instr.rs1 == 0) {
         if (fm == 0x8 && pred == 0x3 && succ == 0x3) {
-            snprintf(out, 128, "fence.tso");
+            snprintf(out, INSTRUCTION_STR_LEN, "fence.tso");
             return;
         }
         if (fm == 0 && pred != 0 && succ != 0) {
             char p[5], q[5];
             format_fence_set(pred, p);
             format_fence_set(succ, q);
-            snprintf(out, 128, "fence %s, %s", p, q);
+            snprintf(out, INSTRUCTION_STR_LEN, "fence %s, %s", p, q);
             return;
         }
     }
@@ -113,46 +114,48 @@ static void format_fence(struct Instruction instr, char out[static 128])
     const unsigned word = ((unsigned)instr.imm & 0xfffu) << 20 |
                           (unsigned)instr.rs1 << 15 | (unsigned)instr.rd << 7 |
                           0x0fu;
-    snprintf(out, 128, ".word 0x%08x", word);
+    snprintf(out, INSTRUCTION_STR_LEN, ".word 0x%08x", word);
 }
 
-void format_instruction(struct Instruction instr, char out[static 128])
+void format_instruction(struct Instruction instr,
+                        char out[static INSTRUCTION_STR_LEN])
 {
     const char* name = k_info[instr.mnemonic].name;
     const enum OperandForm form = k_info[instr.mnemonic].form;
 
     switch (form) {
         case OPF_REG_REG:
-            snprintf(out, 128, "%s x%d, x%d, x%d", name, instr.rd, instr.rs1,
-                     instr.rs2);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, x%d", name,
+                     instr.rd, instr.rs1, instr.rs2);
             break;
         case OPF_REG_IMM:
-            snprintf(out, 128, "%s x%d, x%d, %d", name, instr.rd, instr.rs1,
-                     instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, %d", name,
+                     instr.rd, instr.rs1, instr.imm);
             break;
         case OPF_LOAD:
-            snprintf(out, 128, "%s x%d, %d(x%d)", name, instr.rd, instr.imm,
-                     instr.rs1);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %d(x%d)", name,
+                     instr.rd, instr.imm, instr.rs1);
             break;
         case OPF_STORE:
-            snprintf(out, 128, "%s x%d, %d(x%d)", name, instr.rs2, instr.imm,
-                     instr.rs1);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %d(x%d)", name,
+                     instr.rs2, instr.imm, instr.rs1);
             break;
         case OPF_BRANCH:
-            snprintf(out, 128, "%s x%d, x%d, .%+d", name, instr.rs1, instr.rs2,
-                     instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, .%+d", name,
+                     instr.rs1, instr.rs2, instr.imm);
             break;
         case OPF_UPPER_IMM:
             // stored imm is already shifted, the assembler wants the 20-bit
             // value
-            snprintf(out, 128, "%s x%d, 0x%x", name, instr.rd,
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, 0x%x", name, instr.rd,
                      (unsigned)instr.imm >> 12);
             break;
         case OPF_JUMP:
-            snprintf(out, 128, "%s x%d, .%+d", name, instr.rd, instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, .%+d", name, instr.rd,
+                     instr.imm);
             break;
         case OPF_NONE:
-            snprintf(out, 128, "%s", name);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s", name);
             break;
         case OPF_FENCE:
             format_fence(instr, out);

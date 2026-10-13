@@ -88,7 +88,7 @@ int main(int ac, char** av)
     cpu_dump(&cpu, cpu_str);
     printf("%s\n", cpu_str);
 
-    char instruction_str[128] = {0};
+    char instruction_str[INSTRUCTION_STR_LEN] = {0};
 
     while (1) {
         u32 raw_instruction;

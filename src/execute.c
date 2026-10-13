@@ -26,6 +26,9 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
         case OP_LUI:
             cpu->x[rd] = imm;
             break;
+        case OP_FENCE:
+            // fence is a no-op, all this is single threaded
+            break;
         default:
             return EXEC_UNIMPLEMENTED;
     }

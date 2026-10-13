@@ -15,6 +15,9 @@
     "usage: raven --flat program.bin\n" \
     "       raven --elf program.elf"
 
+// Linux RISC-V syscall numbers (asm-generic/unistd.h)
+#define SYS_EXIT 93
+
 __attribute__((noreturn)) static void die(const char* fmt, ...)
 {
     fflush(stdout);
@@ -115,8 +118,13 @@ int main(int ac, char** av)
                 die("fatal");
             case EXEC_ECALL:
                 switch (cpu.x[REG_A7]) {
-                    case 93:
-                        exit(cpu.x[REG_A0]);
+                    case SYS_EXIT:
+                        // the OS only keeps 8 bits: 256 would read as 0
+                        if (cpu.x[REG_A0] > 0xff) {
+                            die("exit code %u does not fit in 8 bits",
+                                cpu.x[REG_A0]);
+                        }
+                        exit((int)cpu.x[REG_A0]);
                     default:
                         die("unkown syscall %i", cpu.x[REG_A7]);
                 }

@@ -47,6 +47,12 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
         case OP_ORI:
             cpu->x[rd] = cpu->x[rs1] | (u32)imm;
             break;
+        case OP_XOR:
+            cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+            break;
+        case OP_XORI:
+            cpu->x[rd] = cpu->x[rs1] ^ (u32)imm;
+            break;
         // shifts by register use only the low 5 bits of rs2. The immediate
         // forms carry a 5-bit shamt, already extracted by the decoder.
         case OP_SLL:

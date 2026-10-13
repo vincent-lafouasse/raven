@@ -44,7 +44,6 @@ release: $(RELEASE_NINJA)
 $(DEBUG_NINJA): CMakeLists.txt
 	$(CMAKE) -S . -B $(DEBUG_DIR) -G Ninja \
 		-DCMAKE_BUILD_TYPE=Debug \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		$(CMAKE_ARGS)
 
 $(RELEASE_NINJA): CMakeLists.txt

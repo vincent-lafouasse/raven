@@ -6,6 +6,7 @@
 
 #include "bus.h"
 #include "cpu.h"
+#include "execute.h"
 #include "instruction.h"
 #include "loader.h"
 #include "utils.h"
@@ -94,6 +95,26 @@ int main(int ac, char** av)
     char str[128] = {0};
     format_instruction(instruction, str);
     printf("%s\n", str);
+
+    switch (execute(&cpu, bus, instruction)) {
+        case EXEC_UNIMPLEMENTED:
+            die("Unimplemented instruction");
+        case EXEC_UNSUPPORTED:
+            die("Unsupported instruction");
+        case EXEC_EBREAK:
+            // TODO: is this actually ebreak ?
+            printf("ebreak\n");
+            exit(0);
+        case EXEC_BUS_FAULT:
+        case EXEC_MISALIGNED_PC:
+            // TODO: be less coarse
+            die("fatal");
+        case EXEC_ECALL:
+            // TODO: actually do something with syscalls
+            die("ecall");
+        case EXEC_OK:
+            break;
+    }
 
     free(bus);
     return EXIT_SUCCESS;

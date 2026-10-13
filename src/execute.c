@@ -21,6 +21,21 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
         case OP_ADDI:
             cpu->x[rd] = cpu->x[rs1] + (u32)imm;
             break;
+        case OP_SUB:
+            cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
+            break;
+        case OP_AND:
+            cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
+            break;
+        case OP_ANDI:
+            cpu->x[rd] = cpu->x[rs1] & (u32)imm;
+            break;
+        case OP_OR:
+            cpu->x[rd] = cpu->x[rs1] | cpu->x[rs2];
+            break;
+        case OP_ORI:
+            cpu->x[rd] = cpu->x[rs1] | (u32)imm;
+            break;
         case OP_BNE:
             if (cpu->x[rs1] != cpu->x[rs2]) {
                 next_pc = pc + imm;

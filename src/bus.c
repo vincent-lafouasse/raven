@@ -1,6 +1,5 @@
 #include "bus.h"
 
-#include <assert.h>
 #include <stdbool.h>
 
 #include "bitcast.h"
@@ -8,7 +7,11 @@
 
 static enum BusStatus ram_offset(u32 addr, u32 size, u32 offset[static 1])
 {
-    assert(size == 1 || size == 2 || size == 4);
+    // internal callers only; kept in release builds since size == 0 would
+    // divide by zero below
+    if (size != 1 && size != 2 && size != 4) {
+        UNREACHABLE();
+    }
 
     if (addr % size != 0) {
         return BUS_MISALIGNED;

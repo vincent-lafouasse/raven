@@ -34,6 +34,12 @@ machine with an error.
 
 Any other `a7` is a fatal error. `ebreak` stops the machine with an error.
 
+## Roadmap
+
+RV32 only, C extension planned, aiming at a 32-bit port of xv6. Next
+milestone: machine mode with Zicsr and traps. See
+[docs/roadmap.md](docs/roadmap.md).
+
 ## Tools
 
 - `raven`: the emulator (in progress).
@@ -60,3 +66,22 @@ runs both through ctest.
   - `test/compile.sh --flat|--elf test.S` builds one test.
   - `test/run-riscv-tests.sh [name...]` builds and runs them, reporting PASS,
     FAIL (a check in the test failed) or ERROR (build or raven failed).
+
+### rv32ui progress
+
+18 of 40 pass, the other 22 stop on an instruction `execute` does not
+implement yet. Refresh with `test/run-riscv-tests.sh`.
+
+| Group                  | Passing                                  | Not yet                        |
+|------------------------|------------------------------------------|--------------------------------|
+| register-register      | `add` `sub` `and` `or` `xor` `sll` `srl` `sra` | `slt` `sltu`             |
+| register-immediate     | `addi` `andi` `ori` `xori` `slli` `srli` `srai` | `slti` `sltiu`          |
+| upper immediate        | `lui`                                    | `auipc`                        |
+| branches               | `bne`                                    | `beq` `blt` `bge` `bltu` `bgeu` |
+| jumps                  |                                          | `jal` `jalr`                   |
+| loads                  |                                          | `lb` `lbu` `lh` `lhu` `lw`     |
+| stores                 |                                          | `sb` `sh` `sw`                 |
+| mixed                  | `simple`                                 | `ld_st` `st_ld`                |
+
+Skipped: `fence_i` (needs Zifencei) and `ma_data` (misaligned accesses,
+which raven rejects by design).

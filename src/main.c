@@ -1,5 +1,5 @@
-#include <assert.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,6 +8,7 @@
 #include "cpu.h"
 #include "instruction.h"
 #include "loader.h"
+#include "utils.h"
 
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \
@@ -22,6 +23,13 @@ __attribute__((noreturn)) static void die(const char* fmt, ...)
     fputc('\n', stderr);
     va_end(ap);
     exit(EXIT_FAILURE);
+}
+
+void trap(bool cond)
+{
+    if (!cond) {
+        TRACE_TRAP();
+    }
 }
 
 static const char* load_status_str(enum LoadStatus s)
@@ -74,10 +82,10 @@ int main(int ac, char** av)
     cpu_reset(&cpu, entry);
 
     u32 raw_instruction;
-    assert(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
+    trap(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
 
     struct Instruction instruction;
-    assert(decode_instruction(raw_instruction, &instruction) == DR_OK);
+    trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
 
     char str[128] = {0};
     format_instruction(instruction, str);

@@ -126,7 +126,8 @@ int main(int ac, char** av)
                         }
                         exit((int)cpu.x[REG_A0]);
                     default:
-                        die("unkown syscall %i", cpu.x[REG_A7]);
+                        die("unknown syscall a7=0x%08x at pc=0x%08x",
+                            cpu.x[REG_A7], cpu.pc);
                 }
             case EXEC_OK:
                 break;

@@ -28,7 +28,7 @@ DEBUG_NINJA   := $(DEBUG_DIR)/build.ninja
 RELEASE_NINJA := $(RELEASE_DIR)/build.ninja
 
 .DEFAULT_GOAL := debug
-.PHONY: all build debug release test run clean fclean re
+.PHONY: all build debug release test run format clean fclean re
 
 all: build
 

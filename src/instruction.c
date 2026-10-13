@@ -17,6 +17,8 @@ static i32 sign_extend(u32 value, u8 width)
 {
     assert(width >= 1 && width <= 32);
 
+    // relies on gcc/clang: u32 -> i32 keeps the bit pattern and >> on a
+    // negative i32 is arithmetic (both implementation-defined in ISO C)
     const u8 shift = 32 - width;
     return (i32)(value << shift) >> shift;
 }

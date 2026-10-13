@@ -81,6 +81,10 @@ int main(int ac, char** av)
     struct Cpu cpu;
     cpu_reset(&cpu, entry);
 
+    char cpu_str[1024] = {0};
+    cpu_dump(&cpu, cpu_str);
+    printf("%s\n", cpu_str);
+
     u32 raw_instruction;
     trap(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
 

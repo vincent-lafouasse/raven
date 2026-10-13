@@ -86,6 +86,12 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
             return EXEC_UNIMPLEMENTED;
     }
 
+    // without the C extension, every instruction is 4-byte aligned. The
+    // fault belongs to the branch or jump, so check before committing.
+    if (next_pc % 4 != 0) {
+        return EXEC_MISALIGNED_PC;
+    }
+
     cpu->x[REG_ZERO] = 0u;
     cpu->pc = next_pc;
     return EXEC_OK;

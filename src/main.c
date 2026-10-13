@@ -116,6 +116,9 @@ int main(int ac, char** av)
             break;
     }
 
+    cpu_dump(&cpu, cpu_str);
+    printf("%s\n", cpu_str);
+
     free(bus);
     return EXIT_SUCCESS;
 }

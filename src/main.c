@@ -31,7 +31,7 @@ __attribute__((noreturn)) static void die(const char* fmt, ...)
     exit(EXIT_FAILURE);
 }
 
-void trap(bool cond)
+static void trap(bool cond)
 {
     if (!cond) {
         TRACE_TRAP();

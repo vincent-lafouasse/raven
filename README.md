@@ -48,9 +48,15 @@ Any other `a7` is a fatal error. `ebreak` stops the machine with an error.
 
 ## Tests
 
-- `test/`: decoder round trip. `make_test.py` generates `test.s`, `test.sh`
-  assembles it, runs it through `raven-dis`, reassembles the output and
-  compares the binaries.
+Both need a RISC-V cross toolchain (`riscv64-unknown-elf-*`). `make test`
+runs both through ctest.
+
+- `test/decoder-test/`: decoder round trip. `make_test.py` generates `test.s`,
+  `test.sh` assembles it, runs it through `raven-dis`, reassembles the output
+  and compares the binaries.
 - `third_party/riscv-tests`: the `rv32ui` tests, vendored from
   riscv-software-src/riscv-tests. They build against raven's own environment
   in `test/env/riscv_test.h` instead of upstream's boot code.
+  - `test/compile.sh --flat|--elf test.S` builds one test.
+  - `test/run-riscv-tests.sh [name...]` builds and runs them, reporting PASS,
+    FAIL (a check in the test failed) or ERROR (build or raven failed).

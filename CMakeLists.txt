@@ -47,8 +47,12 @@ add_executable(raven-dis tools/disassemble.c)
 target_link_libraries(raven     PRIVATE raven_core)
 target_link_libraries(raven-dis PRIVATE raven_core bitcast::bitcast)
 
-SET(TESTING OFF CACHE BOOL "compile tests")
-if (TESTING)
-    enable_testing()
-    add_subdirectory(test)
-endif()
+# both tests need a RISC-V cross toolchain (riscv64-unknown-elf-*)
+enable_testing()
+add_test(NAME decoder
+    COMMAND sh test.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/decoder-test)
+add_test(NAME riscv-tests
+    COMMAND ${CMAKE_COMMAND} -E env RAVEN=$<TARGET_FILE:raven> NO_COLOR=1
+            ${CMAKE_SOURCE_DIR}/test/run-riscv-tests.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

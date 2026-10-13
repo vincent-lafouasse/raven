@@ -92,9 +92,9 @@ int main(int ac, char** av)
     struct Instruction instruction;
     trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
 
-    char str[128] = {0};
-    format_instruction(instruction, str);
-    printf("%s\n", str);
+    char instruction_str[128] = {0};
+    format_instruction(instruction, instruction_str);
+    printf("%s\n", instruction_str);
 
     switch (execute(&cpu, bus, instruction)) {
         case EXEC_UNIMPLEMENTED:

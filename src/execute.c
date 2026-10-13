@@ -6,15 +6,17 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
 {
     (void)bus;
 
+    const u32 pc = cpu->pc;
+    u32 next_pc = pc + 4;  // only mutated on branches
+
     switch (instr.mnemonic) {
         case OP_ADDI:
             cpu->x[instr.rd] = cpu->x[instr.rs1] + (u32)instr.imm;
-            goto no_branch;
+            break;
         default:
             return EXEC_UNIMPLEMENTED;
     }
 
-no_branch:
-    cpu->pc += 4;
+    cpu->pc = next_pc;
     return EXEC_OK;
 }

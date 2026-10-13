@@ -114,8 +114,12 @@ int main(int ac, char** av)
                 // TODO: be less coarse
                 die("fatal");
             case EXEC_ECALL:
-                // TODO: actually do something with syscalls
-                die("ecall");
+                switch (cpu.x[REG_A7]) {
+                    case 93:
+                        exit(cpu.x[REG_A0]);
+                    default:
+                        die("unkown syscall %i", cpu.x[REG_A7]);
+                }
             case EXEC_OK:
                 break;
         }

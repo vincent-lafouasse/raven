@@ -23,7 +23,7 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
     const i32 imm = instr.imm;
 
     const u32 pc = cpu->pc;
-    u32 next_pc = pc + 4;  // only mutated on branches
+    u32 next_pc = pc + 4;  // only mutated by branches and jumps
 
     switch (instr.mnemonic) {
         case OP_ADD:

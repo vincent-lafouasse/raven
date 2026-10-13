@@ -52,12 +52,36 @@ run_with_timeout() {
     return $status
 }
 
+# colors only when stdout is a terminal, and never when NO_COLOR is set
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+    c_pass=$'\e[32m'          # green: the test passed
+    c_fail=$'\e[31m'          # red: raven ran it and a check failed
+    c_error=$'\e[1;35m'       # bold magenta: build or raven itself broke
+    c_skip=$'\e[2m'           # dim
+    c_reset=$'\e[0m'
+else
+    c_pass='' c_fail='' c_error='' c_skip='' c_reset=''
+fi
+
+# report STATUS NAME [DETAIL]
+report() {
+    local color
+    case "$1" in
+        PASS) color=$c_pass ;;
+        FAIL) color=$c_fail ;;
+        ERROR) color=$c_error ;;
+        *) color=$c_skip ;;
+    esac
+    # pad before coloring so the escape codes don't break the alignment
+    printf '%s%-5s%s %s%s\n' "$color" "$1" "$c_reset" "$2" "${3:+ ($3)}"
+}
+
 mkdir -p "$out_dir"
 pass=0 fail=0 error=0 skipped=0
 
 for name in "${names[@]}"; do
     if [[ " ${skip[*]} " == *" $name "* ]]; then
-        printf '%-8s %s\n' SKIP "$name"
+        report SKIP "$name"
         skipped=$((skipped + 1))
         continue
     fi
@@ -68,7 +92,7 @@ for name in "${names[@]}"; do
 
     if ! "$root/test/compile.sh" --flat "$src_dir/$name.S" "$bin" \
         >"$log" 2>&1; then
-        printf '%-8s %s (build failed, see %s)\n' ERROR "$name" "$rel_log"
+        report ERROR "$name" "build failed, see $rel_log"
         error=$((error + 1))
         continue
     fi
@@ -77,23 +101,22 @@ for name in "${names[@]}"; do
     code=$?
 
     if [ $code -eq 0 ]; then
-        printf '%-8s %s\n' PASS "$name"
+        report PASS "$name"
         pass=$((pass + 1))
     elif [ $code -ge 3 ] && [ $code -lt 128 ] && [ $((code % 2)) -eq 1 ]; then
-        printf '%-8s %s (test case %d, see %s)\n' FAIL "$name" \
-            $((code >> 1)) "$rel_log"
+        report FAIL "$name" "test case $((code >> 1)), see $rel_log"
         fail=$((fail + 1))
     elif [ $code -eq 137 ]; then
-        printf '%-8s %s (killed after %ss, see %s)\n' ERROR "$name" \
-            "$timeout_s" "$rel_log"
+        report ERROR "$name" "killed after ${timeout_s}s, see $rel_log"
         error=$((error + 1))
     else
-        printf '%-8s %s (raven exited %d, see %s)\n' ERROR "$name" \
-            "$code" "$rel_log"
+        report ERROR "$name" "raven exited $code, see $rel_log"
         error=$((error + 1))
     fi
 done
 
 echo
-echo "$pass passed, $fail failed, $error errors, $skipped skipped"
+printf '%s%d passed%s, %s%d failed%s, %s%d errors%s, %d skipped\n' \
+    "$c_pass" "$pass" "$c_reset" "$c_fail" "$fail" "$c_reset" \
+    "$c_error" "$error" "$c_reset" "$skipped"
 [ $fail -eq 0 ] && [ $error -eq 0 ]

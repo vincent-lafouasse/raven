@@ -17,6 +17,7 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
             return EXEC_UNIMPLEMENTED;
     }
 
+    cpu->x[REG_ZERO] = 0u;
     cpu->pc = next_pc;
     return EXEC_OK;
 }

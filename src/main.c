@@ -110,8 +110,8 @@ int main(int ac, char** av)
                 die("Unsupported instruction");
             case EXEC_EBREAK:
                 // TODO: is this actually ebreak ?
-                printf("ebreak\n");
-                exit(0);
+                // not exit(0): the test runner would read that as a pass
+                die("ebreak at pc=0x%08x", cpu.pc);
             case EXEC_BUS_FAULT:
             case EXEC_MISALIGNED_PC:
                 // TODO: be less coarse

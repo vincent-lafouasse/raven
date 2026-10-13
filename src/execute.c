@@ -23,6 +23,9 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
                 next_pc = pc + imm;
             }
             break;
+        case OP_LUI:
+            cpu->x[rd] = imm;
+            break;
         default:
             return EXEC_UNIMPLEMENTED;
     }

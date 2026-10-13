@@ -86,38 +86,41 @@ int main(int ac, char** av)
     cpu_dump(&cpu, cpu_str);
     printf("%s\n", cpu_str);
 
-    u32 raw_instruction;
-    trap(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
-
-    struct Instruction instruction;
-    trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
-
     char instruction_str[128] = {0};
-    format_instruction(instruction, instruction_str);
-    printf("%s\n", instruction_str);
 
-    switch (execute(&cpu, bus, instruction)) {
-        case EXEC_UNIMPLEMENTED:
-            die("Unimplemented instruction");
-        case EXEC_UNSUPPORTED:
-            die("Unsupported instruction");
-        case EXEC_EBREAK:
-            // TODO: is this actually ebreak ?
-            printf("ebreak\n");
-            exit(0);
-        case EXEC_BUS_FAULT:
-        case EXEC_MISALIGNED_PC:
-            // TODO: be less coarse
-            die("fatal");
-        case EXEC_ECALL:
-            // TODO: actually do something with syscalls
-            die("ecall");
-        case EXEC_OK:
-            break;
+    while (1) {
+        u32 raw_instruction;
+        trap(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
+
+        struct Instruction instruction;
+        trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
+
+        format_instruction(instruction, instruction_str);
+        printf("%s\n", instruction_str);
+
+        switch (execute(&cpu, bus, instruction)) {
+            case EXEC_UNIMPLEMENTED:
+                die("Unimplemented instruction");
+            case EXEC_UNSUPPORTED:
+                die("Unsupported instruction");
+            case EXEC_EBREAK:
+                // TODO: is this actually ebreak ?
+                printf("ebreak\n");
+                exit(0);
+            case EXEC_BUS_FAULT:
+            case EXEC_MISALIGNED_PC:
+                // TODO: be less coarse
+                die("fatal");
+            case EXEC_ECALL:
+                // TODO: actually do something with syscalls
+                die("ecall");
+            case EXEC_OK:
+                break;
+        }
+
+        cpu_dump(&cpu, cpu_str);
+        printf("%s\n", cpu_str);
     }
-
-    cpu_dump(&cpu, cpu_str);
-    printf("%s\n", cpu_str);
 
     free(bus);
     return EXIT_SUCCESS;

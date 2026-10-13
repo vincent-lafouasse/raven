@@ -17,7 +17,7 @@ makes QEMU a reference to compare against.
 
 | Address      | Size  | Device | Status  |
 |--------------|-------|--------|---------|
-| `0x80000000` | 1 MiB | RAM    | planned |
+| `0x80000000` | 1 MiB | RAM    | done    |
 | `0x10000000` |       | UART   | later   |
 
 Any access outside a mapped region, or a misaligned access, stops the

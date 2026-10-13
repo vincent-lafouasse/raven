@@ -1,5 +1,16 @@
 #include "execute.h"
 
+// arithmetic right shift without relying on implementation-defined signed >>
+static u32 sra32(u32 value, u32 shamt)
+{
+    const u32 shifted = value >> shamt;
+    if ((value & 0x80000000u) == 0) {
+        return shifted;
+    }
+    // fill the top `shamt` bits with ones
+    return shifted | ~(UINT32_MAX >> shamt);
+}
+
 enum ExecStatus execute(struct Cpu cpu[static 1],
                         struct Bus bus[static 1],
                         struct Instruction instr)
@@ -35,6 +46,26 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
             break;
         case OP_ORI:
             cpu->x[rd] = cpu->x[rs1] | (u32)imm;
+            break;
+        // shifts by register use only the low 5 bits of rs2. The immediate
+        // forms carry a 5-bit shamt, already extracted by the decoder.
+        case OP_SLL:
+            cpu->x[rd] = cpu->x[rs1] << (cpu->x[rs2] & 0x1f);
+            break;
+        case OP_SLLI:
+            cpu->x[rd] = cpu->x[rs1] << (u32)imm;
+            break;
+        case OP_SRL:
+            cpu->x[rd] = cpu->x[rs1] >> (cpu->x[rs2] & 0x1f);
+            break;
+        case OP_SRLI:
+            cpu->x[rd] = cpu->x[rs1] >> (u32)imm;
+            break;
+        case OP_SRA:
+            cpu->x[rd] = sra32(cpu->x[rs1], cpu->x[rs2] & 0x1f);
+            break;
+        case OP_SRAI:
+            cpu->x[rd] = sra32(cpu->x[rs1], (u32)imm);
             break;
         case OP_BNE:
             if (cpu->x[rs1] != cpu->x[rs2]) {

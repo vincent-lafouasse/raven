@@ -15,6 +15,9 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
     u32 next_pc = pc + 4;  // only mutated on branches
 
     switch (instr.mnemonic) {
+        case OP_ADD:
+            cpu->x[rd] = cpu->x[rs1] + cpu->x[rs2];
+            break;
         case OP_ADDI:
             cpu->x[rd] = cpu->x[rs1] + (u32)imm;
             break;

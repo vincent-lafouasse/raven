@@ -32,7 +32,7 @@ machine with an error.
 |------|--------------|
 | 93   | `exit(a0)`   |
 
-`ebreak` stops the machine.
+Any other `a7` is a fatal error. `ebreak` stops the machine with an error.
 
 ## Tools
 

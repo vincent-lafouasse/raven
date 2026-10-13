@@ -80,6 +80,8 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
             break;
         case OP_ECALL:
             return EXEC_ECALL;
+        case OP_EBREAK:
+            return EXEC_EBREAK;
         default:
             return EXEC_UNIMPLEMENTED;
     }

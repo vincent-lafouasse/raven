@@ -13,6 +13,11 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
         case OP_ADDI:
             cpu->x[instr.rd] = cpu->x[instr.rs1] + (u32)instr.imm;
             break;
+        case OP_BNE:
+            if (cpu->x[instr.rs1] != cpu->x[instr.rs2]) {
+                next_pc = pc + instr.imm;
+            }
+            break;
         default:
             return EXEC_UNIMPLEMENTED;
     }

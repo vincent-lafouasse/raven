@@ -84,7 +84,7 @@ int main(int ac, char** av)
     struct Cpu cpu;
     cpu_reset(&cpu, entry);
 
-    char cpu_str[1024] = {0};
+    char cpu_str[CPU_DUMP_LEN] = {0};
     cpu_dump(&cpu, cpu_str);
     printf("%s\n", cpu_str);
 

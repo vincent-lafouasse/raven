@@ -19,9 +19,9 @@ static const char* const k_abi_names[32] = {
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
-void cpu_dump(const struct Cpu cpu[static 1], char out[static 1024])
+void cpu_dump(const struct Cpu cpu[static 1], char out[static CPU_DUMP_LEN])
 {
-    const size_t cap = 1024;
+    const size_t cap = CPU_DUMP_LEN;
     size_t n = 0;
 
     // each piece is a fixed width well below what's left, so n stays < cap

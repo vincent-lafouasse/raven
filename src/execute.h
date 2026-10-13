@@ -10,6 +10,8 @@ enum ExecStatus {
     EXEC_EBREAK,
     EXEC_BUS_FAULT,
     EXEC_MISALIGNED_PC,
+    EXEC_UNSUPPORTED,
+    EXEC_UNIMPLEMENTED,
 };
 
 enum ExecStatus execute(struct Cpu cpu[static 1],

@@ -182,8 +182,11 @@ static enum DecodeResult decode_op(u32 word, struct Instruction out[static 1])
             UNREACHABLE();
     }
 
-    *out = (struct Instruction){
-        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .rs2 = data.rs2};
+    *out = (struct Instruction){.raw = word,
+                                .mnemonic = m,
+                                .rd = data.rd,
+                                .rs1 = data.rs1,
+                                .rs2 = data.rs2};
     return DR_OK;
 }
 
@@ -240,7 +243,7 @@ static enum DecodeResult decode_op_imm(u32 word,
     }
 
     *out = (struct Instruction){
-        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = imm};
+        .raw = word, .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = imm};
     return DR_OK;
 }
 
@@ -271,8 +274,11 @@ static enum DecodeResult decode_load(u32 word, struct Instruction out[static 1])
             return DR_BAD_FUNCT3;
     }
 
-    *out = (struct Instruction){
-        .mnemonic = m, .rd = data.rd, .rs1 = data.rs1, .imm = data.imm};
+    *out = (struct Instruction){.raw = word,
+                                .mnemonic = m,
+                                .rd = data.rd,
+                                .rs1 = data.rs1,
+                                .imm = data.imm};
     return DR_OK;
 }
 
@@ -298,8 +304,11 @@ static enum DecodeResult decode_store(u32 word,
             return DR_BAD_FUNCT3;
     }
 
-    *out = (struct Instruction){
-        .mnemonic = m, .rs1 = data.rs1, .rs2 = data.rs2, .imm = data.imm};
+    *out = (struct Instruction){.raw = word,
+                                .mnemonic = m,
+                                .rs1 = data.rs1,
+                                .rs2 = data.rs2,
+                                .imm = data.imm};
     return DR_OK;
 }
 
@@ -334,8 +343,11 @@ static enum DecodeResult decode_branch(u32 word,
             return DR_BAD_FUNCT3;
     }
 
-    *out = (struct Instruction){
-        .mnemonic = m, .rs1 = data.rs1, .rs2 = data.rs2, .imm = data.imm};
+    *out = (struct Instruction){.raw = word,
+                                .mnemonic = m,
+                                .rs1 = data.rs1,
+                                .rs2 = data.rs2,
+                                .imm = data.imm};
     return DR_OK;
 }
 
@@ -344,7 +356,7 @@ static enum DecodeResult decode_jal(u32 word, struct Instruction out[static 1])
     const struct RawPayload data = read_payload(word, FMT_J);
 
     *out = (struct Instruction){
-        .mnemonic = OP_JAL, .rd = data.rd, .imm = data.imm};
+        .raw = word, .mnemonic = OP_JAL, .rd = data.rd, .imm = data.imm};
     return DR_OK;
 }
 
@@ -356,8 +368,11 @@ static enum DecodeResult decode_jalr(u32 word, struct Instruction out[static 1])
         return DR_BAD_FUNCT3;
     }
 
-    *out = (struct Instruction){
-        .mnemonic = OP_JALR, .rd = data.rd, .rs1 = data.rs1, .imm = data.imm};
+    *out = (struct Instruction){.raw = word,
+                                .mnemonic = OP_JALR,
+                                .rd = data.rd,
+                                .rs1 = data.rs1,
+                                .imm = data.imm};
     return DR_OK;
 }
 
@@ -366,7 +381,7 @@ static enum DecodeResult decode_lui(u32 word, struct Instruction out[static 1])
     const struct RawPayload data = read_payload(word, FMT_U);
 
     *out = (struct Instruction){
-        .mnemonic = OP_LUI, .rd = data.rd, .imm = data.imm};
+        .raw = word, .mnemonic = OP_LUI, .rd = data.rd, .imm = data.imm};
     return DR_OK;
 }
 
@@ -376,7 +391,7 @@ static enum DecodeResult decode_auipc(u32 word,
     const struct RawPayload data = read_payload(word, FMT_U);
 
     *out = (struct Instruction){
-        .mnemonic = OP_AUIPC, .rd = data.rd, .imm = data.imm};
+        .raw = word, .mnemonic = OP_AUIPC, .rd = data.rd, .imm = data.imm};
     return DR_OK;
 }
 
@@ -387,10 +402,10 @@ static enum DecodeResult decode_system(u32 word,
     // have no operands, so the whole word is fixed.
     switch (word) {
         case 0x00000073:
-            *out = (struct Instruction){.mnemonic = OP_ECALL};
+            *out = (struct Instruction){.raw = word, .mnemonic = OP_ECALL};
             return DR_OK;
         case 0x00100073:
-            *out = (struct Instruction){.mnemonic = OP_EBREAK};
+            *out = (struct Instruction){.raw = word, .mnemonic = OP_EBREAK};
             return DR_OK;
         default:
             // CSR instructions (funct3 != 0) and privileged ones (MRET, WFI,
@@ -410,6 +425,7 @@ static enum DecodeResult decode_misc_mem(u32 word,
             // 1000 is FENCE.TSO, the others are reserved and behave as a
             // normal FENCE.
             *out = (struct Instruction){
+                .raw = word,
                 .mnemonic = OP_FENCE,
                 .rd = data.rd,
                 .rs1 = data.rs1,

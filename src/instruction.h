@@ -61,6 +61,7 @@ enum Mnemonic {
 };
 
 struct Instruction {
+    u32 raw;
     enum Mnemonic mnemonic;
 
     // payload, some fields might be garbage

@@ -56,9 +56,9 @@ static const char* load_status_str(enum LoadStatus s)
 }
 
 enum TrapActionKind {
-    TRAP_CONTINUE,
-    TRAP_EXIT,
-    TRAP_FATAL,
+    ACTION_CONTINUE,
+    ACTION_EXIT,
+    ACTION_FATAL,
 };
 
 enum FatalReason {
@@ -84,19 +84,19 @@ struct TrapAction handle_ecall(struct Cpu cpu[static 1],
             // the OS only keeps 8 bits: 256 would read as 0
             if (cpu->x[REG_A0] > 0xff) {
                 return (struct TrapAction){
-                    .kind = TRAP_FATAL,
+                    .kind = ACTION_FATAL,
                     .reason = FATAL_BAD_EXIT_VALUE,
                     .value = cpu->x[REG_A0],
                 };
             } else {
                 return (struct TrapAction){
-                    .kind = TRAP_EXIT,
+                    .kind = ACTION_EXIT,
                     .exit_code = cpu->x[REG_A0],
                 };
             }
         default:
             return (struct TrapAction){
-                .kind = TRAP_FATAL,
+                .kind = ACTION_FATAL,
                 .reason = FATAL_UNKNOWN_SYSCALL,
                 .value = cpu->x[REG_A7],
             };
@@ -112,7 +112,7 @@ struct TrapAction handle_trap(struct Trap trap,
             return handle_ecall(cpu, bus);
         default:
             return (struct TrapAction){
-                .kind = TRAP_FATAL,
+                .kind = ACTION_FATAL,
                 .reason = FATAL_TRAP,
                 .value = (u32)trap.cause,
             };
@@ -172,11 +172,11 @@ int main(int ac, char** av)
             const struct TrapAction action =
                 handle_trap(exec_res.trap, &cpu, bus);
             switch (action.kind) {
-                case TRAP_CONTINUE:
+                case ACTION_CONTINUE:
                     break;
-                case TRAP_EXIT:
+                case ACTION_EXIT:
                     exit(action.exit_code);
-                case TRAP_FATAL:
+                case ACTION_FATAL:
                     // TODO: format error messsages
                     die("%s\n", trap_cause_str(exec_res.trap.cause));
             }

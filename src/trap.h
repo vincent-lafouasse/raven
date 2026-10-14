@@ -41,6 +41,14 @@ enum InterruptCode {
     IRQ_M_EXTERNAL = 11,
 };
 
+// Outcome of any operation that can raise a trap (memory access, fetch,
+// execute, step). On TRAP_RAISED the operation's `struct Trap` out-parameter
+// has been filled and the hart's state is unchanged.
+enum TrapStatus {
+    TRAP_NONE,    // completed normally
+    TRAP_RAISED,  // see the struct Trap out-parameter
+};
+
 struct Trap {
     enum TrapCause cause;
     u32 tval;  // what the hardware would write to mtval, see the enum

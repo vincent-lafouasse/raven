@@ -167,34 +167,19 @@ int main(int ac, char** av)
         format_instruction(instruction, instruction_str);
         printf("%s\n", instruction_str);
 
-        switch (execute(&cpu, bus, instruction)) {
-            case EXEC_UNIMPLEMENTED:
-                die("Unimplemented instruction");
-            case EXEC_UNSUPPORTED:
-                die("Unsupported instruction");
-            case EXEC_EBREAK:
-                // TODO: is this actually ebreak ?
-                // not exit(0): the test runner would read that as a pass
-                die("ebreak at pc=0x%08x", cpu.pc);
-            case EXEC_BUS_FAULT:
-            case EXEC_MISALIGNED_PC:
-                // TODO: be less coarse
-                die("fatal");
-            case EXEC_ECALL:
-                switch (cpu.x[REG_A7]) {
-                    case SYS_EXIT:
-                        // the OS only keeps 8 bits: 256 would read as 0
-                        if (cpu.x[REG_A0] > 0xff) {
-                            die("exit code %u does not fit in 8 bits",
-                                cpu.x[REG_A0]);
-                        }
-                        exit((int)cpu.x[REG_A0]);
-                    default:
-                        die("unknown syscall a7=0x%08x at pc=0x%08x",
-                            cpu.x[REG_A7], cpu.pc);
-                }
-            case EXEC_OK:
-                break;
+        const struct ExecStatus exec_res = execute(&cpu, bus, instruction);
+        if (exec_res.trapped) {
+            const struct TrapAction action =
+                handle_trap(exec_res.trap, &cpu, bus);
+            switch (action.kind) {
+                case TRAP_CONTINUE:
+                    break;
+                case TRAP_EXIT:
+                    exit(action.exit_code);
+                case TRAP_FATAL:
+                    // TODO: format error messsages
+                    die("%s\n", trap_cause_str(exec_res.trap.cause));
+            }
         }
 
         cpu_dump(&cpu, cpu_str);

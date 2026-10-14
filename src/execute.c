@@ -1,15 +1,5 @@
 #include "execute.h"
 
-static struct ExecStatus exec_trap(enum TrapCause cause, u32 tval)
-{
-    return (struct ExecStatus){.trapped = true, .trap = make_trap(cause, tval)};
-}
-
-static struct ExecStatus exec_ok(void)
-{
-    return (struct ExecStatus){.trapped = false};
-}
-
 // arithmetic right shift without relying on implementation-defined signed >>
 static u32 sra32(u32 value, u32 shamt)
 {
@@ -21,9 +11,10 @@ static u32 sra32(u32 value, u32 shamt)
     return shifted | ~(UINT32_MAX >> shamt);
 }
 
-struct ExecStatus execute(struct Cpu cpu[static 1],
-                          struct Bus bus[static 1],
-                          struct Instruction instr)
+enum TrapStatus execute(struct Cpu cpu[static 1],
+                        struct Bus bus[static 1],
+                        struct Instruction instr,
+                        struct Trap trap_out[static 1])
 {
     (void)bus;
 
@@ -95,20 +86,24 @@ struct ExecStatus execute(struct Cpu cpu[static 1],
             // fence is a no-op, all this is single threaded
             break;
         case OP_ECALL:
-            return exec_trap(CAUSE_ECALL_M, 0);
+            *trap_out = make_trap(CAUSE_ECALL_M, 0);
+            return TRAP_RAISED;
         case OP_EBREAK:
-            return exec_trap(CAUSE_BREAKPOINT, pc);
+            *trap_out = make_trap(CAUSE_BREAKPOINT, pc);
+            return TRAP_RAISED;
         default:
-            return exec_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
+            *trap_out = make_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
+            return TRAP_RAISED;
     }
 
     // without the C extension, every instruction is 4-byte aligned. The
     // fault belongs to the branch or jump, so check before committing.
     if (next_pc % 4 != 0) {
-        return exec_trap(CAUSE_MISALIGNED_FETCH, next_pc);
+        *trap_out = make_trap(CAUSE_MISALIGNED_FETCH, next_pc);
+        return TRAP_RAISED;
     }
 
     cpu->x[REG_ZERO] = 0u;
     cpu->pc = next_pc;
-    return exec_ok();
+    return TRAP_NONE;
 }

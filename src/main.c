@@ -167,10 +167,9 @@ int main(int ac, char** av)
         format_instruction(instruction, instruction_str);
         printf("%s\n", instruction_str);
 
-        const struct ExecStatus exec_res = execute(&cpu, bus, instruction);
-        if (exec_res.trapped) {
-            const struct TrapAction action =
-                handle_trap(exec_res.trap, &cpu, bus);
+        struct Trap trap;
+        if (execute(&cpu, bus, instruction, &trap) == TRAP_RAISED) {
+            const struct TrapAction action = handle_trap(trap, &cpu, bus);
             switch (action.kind) {
                 case ACTION_CONTINUE:
                     break;
@@ -178,7 +177,7 @@ int main(int ac, char** av)
                     exit(action.exit_code);
                 case ACTION_FATAL:
                     // TODO: format error messsages
-                    die("%s\n", trap_cause_str(exec_res.trap.cause));
+                    die("%s\n", trap_cause_str(trap.cause));
             }
         }
 

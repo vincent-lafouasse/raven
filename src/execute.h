@@ -7,11 +7,8 @@
 #include "instruction.h"
 #include "trap.h"
 
-struct ExecStatus {
-    bool trapped;
-    struct Trap trap;
-};
-
-struct ExecStatus execute(struct Cpu cpu[static 1],
-                          struct Bus bus[static 1],
-                          struct Instruction instr);
+enum TrapStatus execute(struct Cpu cpu[static 1],
+                        struct Bus bus[static 1],
+                        struct Instruction instr,
+                        struct Trap trap_out[static 1]  // written on trap
+);

@@ -105,7 +105,19 @@ struct TrapAction handle_ecall(struct Cpu cpu[static 1],
 
 struct TrapAction handle_trap(struct Trap trap,
                               struct Cpu cpu[static 1],
-                              struct Bus bus[static 1]);
+                              struct Bus bus[static 1])
+{
+    switch (trap.cause) {
+        case CAUSE_ECALL_M:
+            return handle_ecall(cpu, bus);
+        default:
+            return (struct TrapAction){
+                .kind = TRAP_FATAL,
+                .reason = FATAL_TRAP,
+                .value = (u32)trap.cause,
+            };
+    }
+}
 
 int main(int ac, char** av)
 {

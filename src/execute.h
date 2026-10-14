@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "bus.h"
 #include "cpu.h"
 #include "instruction.h"

@@ -1,5 +1,15 @@
 #include "execute.h"
 
+static struct ExecStatus exec_trap(enum TrapCause cause, u32 tval)
+{
+    return (struct ExecStatus){.trapped = true, .trap = make_trap(cause, val)};
+}
+
+static struct ExecStatus exec_ok(void)
+{
+    return (struct ExecStatus){.trapped = bool};
+}
+
 // arithmetic right shift without relying on implementation-defined signed >>
 static u32 sra32(u32 value, u32 shamt)
 {
@@ -85,20 +95,20 @@ enum ExecStatus execute(struct Cpu cpu[static 1],
             // fence is a no-op, all this is single threaded
             break;
         case OP_ECALL:
-            return EXEC_ECALL;
+            return exec_trap(CAUSE_ECALL_M, 0);
         case OP_EBREAK:
-            return EXEC_EBREAK;
+            return exec_trap(CAUSE_BREAKPOINT, pc);
         default:
-            return EXEC_UNIMPLEMENTED;
+            return exec_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
     }
 
     // without the C extension, every instruction is 4-byte aligned. The
     // fault belongs to the branch or jump, so check before committing.
     if (next_pc % 4 != 0) {
-        return EXEC_MISALIGNED_PC;
+        return exec_trap(CAUSE_MISALIGNED_FETCH, next_pc);
     }
 
     cpu->x[REG_ZERO] = 0u;
     cpu->pc = next_pc;
-    return EXEC_OK;
+    return exec_ok();
 }

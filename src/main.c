@@ -74,6 +74,35 @@ struct TrapAction {
     u32 value;                // FATAL
 };
 
+struct TrapAction handle_ecall(struct Cpu cpu[static 1],
+                               struct Bus bus[static 1])
+{
+    (void)bus;
+
+    switch (cpu->x[REG_A7]) {
+        case SYS_EXIT:
+            // the OS only keeps 8 bits: 256 would read as 0
+            if (cpu.x[REG_A0] > 0xff) {
+                return (struct TrapAction){
+                    .kind = TRAP_FATAL,
+                    .reason = FATAL_BAD_EXIT_VALUE,
+                    .value = cpu->x[REG_A0],
+                };
+            } else {
+                return (struct TrapAction){
+                    .kind = TRAP_EXIT,
+                    .exit_code = cpu->x[REG_A0],
+                };
+            }
+        default:
+            return (struct TrapAction){
+                .kind = TRAP_FATAL,
+                .reason = FATAL_UNKNOWN_SYSCALL,
+                .value = cpu->x[REG_A7],
+            };
+    }
+}
+
 struct TrapAction handle_trap(struct Trap trap,
                               struct Cpu cpu[static 1],
                               struct Bus bus[static 1]);

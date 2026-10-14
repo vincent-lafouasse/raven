@@ -55,6 +55,22 @@ static const char* load_status_str(enum LoadStatus s)
     return "unknown error";
 }
 
+enum TrapActionKind {
+    TRAP_CONTINUE,
+    TRAP_EXIT,   // with payload u8 exit_code
+    TRAP_FATAL,  // payload static const char* reason
+};
+
+struct TrapAction {
+    enum TrapActionKind kind;
+    u8 exit_code;
+    const char* reason;
+};
+
+struct TrapAction handle_trap(struct Trap trap,
+                              struct Cpu cpu[static 1],
+                              struct Bus bus[static 1]);
+
 int main(int ac, char** av)
 {
     if (ac != 3) {

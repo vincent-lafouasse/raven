@@ -82,7 +82,7 @@ struct TrapAction handle_ecall(struct Cpu cpu[static 1],
     switch (cpu->x[REG_A7]) {
         case SYS_EXIT:
             // the OS only keeps 8 bits: 256 would read as 0
-            if (cpu.x[REG_A0] > 0xff) {
+            if (cpu->x[REG_A0] > 0xff) {
                 return (struct TrapAction){
                     .kind = TRAP_FATAL,
                     .reason = FATAL_BAD_EXIT_VALUE,

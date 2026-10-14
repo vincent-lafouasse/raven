@@ -2,12 +2,12 @@
 
 static struct ExecStatus exec_trap(enum TrapCause cause, u32 tval)
 {
-    return (struct ExecStatus){.trapped = true, .trap = make_trap(cause, val)};
+    return (struct ExecStatus){.trapped = true, .trap = make_trap(cause, tval)};
 }
 
 static struct ExecStatus exec_ok(void)
 {
-    return (struct ExecStatus){.trapped = bool};
+    return (struct ExecStatus){.trapped = false};
 }
 
 // arithmetic right shift without relying on implementation-defined signed >>
@@ -21,9 +21,9 @@ static u32 sra32(u32 value, u32 shamt)
     return shifted | ~(UINT32_MAX >> shamt);
 }
 
-enum ExecStatus execute(struct Cpu cpu[static 1],
-                        struct Bus bus[static 1],
-                        struct Instruction instr)
+struct ExecStatus execute(struct Cpu cpu[static 1],
+                          struct Bus bus[static 1],
+                          struct Instruction instr)
 {
     (void)bus;
 

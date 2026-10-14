@@ -74,12 +74,12 @@ static const struct {
 };
 
 // writes a fence predecessor/successor set as a subset of "iorw"
-static void format_fence_set(unsigned set, char out[static 5])
+static void format_fence_set(u32 set, char out[static 5])
 {
     const char* letters = "iorw";
     size_t n = 0;
 
-    for (unsigned i = 0; i < 4; ++i) {
+    for (u32 i = 0; i < 4; ++i) {
         if (set & (0x8u >> i)) {
             out[n++] = letters[i];
         }
@@ -90,9 +90,9 @@ static void format_fence_set(unsigned set, char out[static 5])
 static void format_fence(struct Instruction instr,
                          char out[static INSTRUCTION_STR_LEN])
 {
-    const unsigned fm = ((unsigned)instr.imm >> 8) & 0xf;
-    const unsigned pred = ((unsigned)instr.imm >> 4) & 0xf;
-    const unsigned succ = (unsigned)instr.imm & 0xf;
+    const u32 fm = ((u32)instr.imm >> 8) & 0xf;
+    const u32 pred = ((u32)instr.imm >> 4) & 0xf;
+    const u32 succ = (u32)instr.imm & 0xf;
 
     if (instr.rd == 0 && instr.rs1 == 0) {
         if (fm == 0x8 && pred == 0x3 && succ == 0x3) {
@@ -111,9 +111,8 @@ static void format_fence(struct Instruction instr,
     // anything else (reserved fm, empty sets such as PAUSE, nonzero rd/rs1)
     // has no portable assembly syntax: rebuild the word so the output still
     // reassembles to the same bytes
-    const unsigned word = ((unsigned)instr.imm & 0xfffu) << 20 |
-                          (unsigned)instr.rs1 << 15 | (unsigned)instr.rd << 7 |
-                          0x0fu;
+    const u32 word = ((u32)instr.imm & 0xfffu) << 20 | (u32)instr.rs1 << 15 |
+                     (u32)instr.rd << 7 | 0x0fu;
     snprintf(out, INSTRUCTION_STR_LEN, ".word 0x%08x", word);
 }
 
@@ -148,7 +147,7 @@ void format_instruction(struct Instruction instr,
             // stored imm is already shifted, the assembler wants the 20-bit
             // value
             snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, 0x%x", name, instr.rd,
-                     (unsigned)instr.imm >> 12);
+                     (u32)instr.imm >> 12);
             break;
         case OPF_JUMP:
             snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, .%+d", name, instr.rd,

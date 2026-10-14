@@ -57,14 +57,21 @@ static const char* load_status_str(enum LoadStatus s)
 
 enum TrapActionKind {
     TRAP_CONTINUE,
-    TRAP_EXIT,   // with payload u8 exit_code
-    TRAP_FATAL,  // payload static const char* reason
+    TRAP_EXIT,
+    TRAP_FATAL,
+};
+
+enum FatalReason {
+    FATAL_UNKNOWN_SYSCALL,  // value: a7
+    FATAL_BAD_EXIT_VALUE,   // value: a0
+    FATAL_TRAP,             // value: trap cause
 };
 
 struct TrapAction {
     enum TrapActionKind kind;
-    u8 exit_code;
-    const char* reason;
+    u8 exit_code;             // EXIT
+    enum FatalReason reason;  // FATAL
+    u32 value;                // FATAL
 };
 
 struct TrapAction handle_trap(struct Trap trap,

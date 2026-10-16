@@ -35,12 +35,12 @@
 #define REG_T5 30u
 #define REG_T6 31u
 
-struct Cpu {
+struct Hart {
     u32 x[32];
     u32 pc;
 };
 
-void cpu_reset(struct Cpu cpu[static 1], u32 entry);
+void hart_reset(struct Hart hart[static 1], u32 entry);
 
 // Writes pc and all 32 registers as hex, 4 registers per line, each tagged
 // with its number and ABI name, e.g.
@@ -48,7 +48,8 @@ void cpu_reset(struct Cpu cpu[static 1], u32 entry);
 //   pc   0x80000000
 //   x0  zero 0x00000000  x1  ra   0x00000000  x2  sp   0x80100000  ...
 //
-// The output is about 700 bytes and always fits in CPU_DUMP_LEN.
-#define CPU_DUMP_LEN 1024
+// The output is about 700 bytes and always fits in HART_DUMP_LEN.
+#define HART_DUMP_LEN 1024
 
-void cpu_dump(const struct Cpu cpu[static 1], char out[static CPU_DUMP_LEN]);
+void hart_dump(const struct Hart hart[static 1],
+               char out[static HART_DUMP_LEN]);

@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "bus.h"
-#include "cpu.h"
 #include "execute.h"
+#include "hart.h"
 #include "instruction.h"
 #include "loader.h"
 #include "utils.h"
@@ -74,42 +74,42 @@ struct TrapAction {
     u32 value;                // FATAL
 };
 
-struct TrapAction handle_ecall(struct Cpu cpu[static 1],
+struct TrapAction handle_ecall(struct Hart hart[static 1],
                                struct Bus bus[static 1])
 {
     (void)bus;
 
-    switch (cpu->x[REG_A7]) {
+    switch (hart->x[REG_A7]) {
         case SYS_EXIT:
             // the OS only keeps 8 bits: 256 would read as 0
-            if (cpu->x[REG_A0] > 0xff) {
+            if (hart->x[REG_A0] > 0xff) {
                 return (struct TrapAction){
                     .kind = ACTION_FATAL,
                     .reason = FATAL_BAD_EXIT_VALUE,
-                    .value = cpu->x[REG_A0],
+                    .value = hart->x[REG_A0],
                 };
             } else {
                 return (struct TrapAction){
                     .kind = ACTION_EXIT,
-                    .exit_code = cpu->x[REG_A0],
+                    .exit_code = hart->x[REG_A0],
                 };
             }
         default:
             return (struct TrapAction){
                 .kind = ACTION_FATAL,
                 .reason = FATAL_UNKNOWN_SYSCALL,
-                .value = cpu->x[REG_A7],
+                .value = hart->x[REG_A7],
             };
     }
 }
 
 struct TrapAction handle_trap(struct Trap trap,
-                              struct Cpu cpu[static 1],
+                              struct Hart hart[static 1],
                               struct Bus bus[static 1])
 {
     switch (trap.cause) {
         case CAUSE_ECALL_M:
-            return handle_ecall(cpu, bus);
+            return handle_ecall(hart, bus);
         default:
             return (struct TrapAction){
                 .kind = ACTION_FATAL,
@@ -148,18 +148,18 @@ int main(int ac, char** av)
         die("%s: %s", binary_path, load_status_str(status));
     }
 
-    struct Cpu cpu;
-    cpu_reset(&cpu, entry);
+    struct Hart hart;
+    hart_reset(&hart, entry);
 
-    char cpu_str[CPU_DUMP_LEN] = {0};
-    cpu_dump(&cpu, cpu_str);
-    printf("%s\n", cpu_str);
+    char hart_str[HART_DUMP_LEN] = {0};
+    hart_dump(&hart, hart_str);
+    printf("%s\n", hart_str);
 
     char instruction_str[INSTRUCTION_STR_LEN] = {0};
 
     while (1) {
         u32 raw_instruction;
-        trap(bus_read(bus, cpu.pc, 4, &raw_instruction) == BUS_OK);
+        trap(bus_read(bus, hart.pc, 4, &raw_instruction) == BUS_OK);
 
         struct Instruction instruction;
         trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
@@ -168,8 +168,8 @@ int main(int ac, char** av)
         printf("%s\n", instruction_str);
 
         struct Trap trap;
-        if (execute(&cpu, bus, instruction, &trap) == TRAP_RAISED) {
-            const struct TrapAction action = handle_trap(trap, &cpu, bus);
+        if (execute(&hart, bus, instruction, &trap) == TRAP_RAISED) {
+            const struct TrapAction action = handle_trap(trap, &hart, bus);
             switch (action.kind) {
                 case ACTION_CONTINUE:
                     break;
@@ -181,8 +181,8 @@ int main(int ac, char** av)
             }
         }
 
-        cpu_dump(&cpu, cpu_str);
-        printf("%s\n", cpu_str);
+        hart_dump(&hart, hart_str);
+        printf("%s\n", hart_str);
     }
 
     free(bus);

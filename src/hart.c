@@ -1,16 +1,16 @@
-#include "cpu.h"
+#include "hart.h"
 
 #include <stdio.h>
 
 #include "bus.h"
 
-void cpu_reset(struct Cpu cpu[static 1], u32 entry)
+void hart_reset(struct Hart hart[static 1], u32 entry)
 {
-    *cpu = (struct Cpu){0};
+    *hart = (struct Hart){0};
 
-    cpu->x[REG_SP] = RAM_BASE + RAM_SIZE;
+    hart->x[REG_SP] = RAM_BASE + RAM_SIZE;
 
-    cpu->pc = entry;
+    hart->pc = entry;
 }
 
 static const char* const k_abi_names[32] = {
@@ -19,17 +19,17 @@ static const char* const k_abi_names[32] = {
     "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
 };
 
-void cpu_dump(const struct Cpu cpu[static 1], char out[static CPU_DUMP_LEN])
+void hart_dump(const struct Hart hart[static 1], char out[static HART_DUMP_LEN])
 {
-    const size_t cap = CPU_DUMP_LEN;
+    const size_t cap = HART_DUMP_LEN;
     size_t n = 0;
 
     // each piece is a fixed width well below what's left, so n stays < cap
-    n += (size_t)snprintf(out + n, cap - n, "pc   0x%08x\n", cpu->pc);
+    n += (size_t)snprintf(out + n, cap - n, "pc   0x%08x\n", hart->pc);
 
     for (unsigned i = 0; i < 32; ++i) {
         const char* sep = (i % 4 == 3) ? "\n" : "  ";
         n += (size_t)snprintf(out + n, cap - n, "x%-2u %-4s 0x%08x%s", i,
-                              k_abi_names[i], cpu->x[i], sep);
+                              k_abi_names[i], hart->x[i], sep);
     }
 }

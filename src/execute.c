@@ -11,7 +11,7 @@ static u32 sra32(u32 value, u32 shamt)
     return shifted | ~(UINT32_MAX >> shamt);
 }
 
-enum TrapStatus execute(struct Cpu cpu[static 1],
+enum TrapStatus execute(struct Hart hart[static 1],
                         struct Bus bus[static 1],
                         struct Instruction instr,
                         struct Trap trap_out[static 1])
@@ -23,64 +23,64 @@ enum TrapStatus execute(struct Cpu cpu[static 1],
     const u8 rs2 = instr.rs2;
     const i32 imm = instr.imm;
 
-    const u32 pc = cpu->pc;
+    const u32 pc = hart->pc;
     u32 next_pc = pc + 4;  // only mutated by branches and jumps
 
     switch (instr.mnemonic) {
         case OP_ADD:
-            cpu->x[rd] = cpu->x[rs1] + cpu->x[rs2];
+            hart->x[rd] = hart->x[rs1] + hart->x[rs2];
             break;
         case OP_ADDI:
-            cpu->x[rd] = cpu->x[rs1] + (u32)imm;
+            hart->x[rd] = hart->x[rs1] + (u32)imm;
             break;
         case OP_SUB:
-            cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
+            hart->x[rd] = hart->x[rs1] - hart->x[rs2];
             break;
         case OP_AND:
-            cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
+            hart->x[rd] = hart->x[rs1] & hart->x[rs2];
             break;
         case OP_ANDI:
-            cpu->x[rd] = cpu->x[rs1] & (u32)imm;
+            hart->x[rd] = hart->x[rs1] & (u32)imm;
             break;
         case OP_OR:
-            cpu->x[rd] = cpu->x[rs1] | cpu->x[rs2];
+            hart->x[rd] = hart->x[rs1] | hart->x[rs2];
             break;
         case OP_ORI:
-            cpu->x[rd] = cpu->x[rs1] | (u32)imm;
+            hart->x[rd] = hart->x[rs1] | (u32)imm;
             break;
         case OP_XOR:
-            cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+            hart->x[rd] = hart->x[rs1] ^ hart->x[rs2];
             break;
         case OP_XORI:
-            cpu->x[rd] = cpu->x[rs1] ^ (u32)imm;
+            hart->x[rd] = hart->x[rs1] ^ (u32)imm;
             break;
         // shifts by register use only the low 5 bits of rs2. The immediate
         // forms carry a 5-bit shamt, already extracted by the decoder.
         case OP_SLL:
-            cpu->x[rd] = cpu->x[rs1] << (cpu->x[rs2] & 0x1f);
+            hart->x[rd] = hart->x[rs1] << (hart->x[rs2] & 0x1f);
             break;
         case OP_SLLI:
-            cpu->x[rd] = cpu->x[rs1] << (u32)imm;
+            hart->x[rd] = hart->x[rs1] << (u32)imm;
             break;
         case OP_SRL:
-            cpu->x[rd] = cpu->x[rs1] >> (cpu->x[rs2] & 0x1f);
+            hart->x[rd] = hart->x[rs1] >> (hart->x[rs2] & 0x1f);
             break;
         case OP_SRLI:
-            cpu->x[rd] = cpu->x[rs1] >> (u32)imm;
+            hart->x[rd] = hart->x[rs1] >> (u32)imm;
             break;
         case OP_SRA:
-            cpu->x[rd] = sra32(cpu->x[rs1], cpu->x[rs2] & 0x1f);
+            hart->x[rd] = sra32(hart->x[rs1], hart->x[rs2] & 0x1f);
             break;
         case OP_SRAI:
-            cpu->x[rd] = sra32(cpu->x[rs1], (u32)imm);
+            hart->x[rd] = sra32(hart->x[rs1], (u32)imm);
             break;
         case OP_BNE:
-            if (cpu->x[rs1] != cpu->x[rs2]) {
+            if (hart->x[rs1] != hart->x[rs2]) {
                 next_pc = pc + imm;
             }
             break;
         case OP_LUI:
-            cpu->x[rd] = imm;
+            hart->x[rd] = imm;
             break;
         case OP_FENCE:
             // fence is a no-op, all this is single threaded
@@ -103,7 +103,7 @@ enum TrapStatus execute(struct Cpu cpu[static 1],
         return TRAP_RAISED;
     }
 
-    cpu->x[REG_ZERO] = 0u;
-    cpu->pc = next_pc;
+    hart->x[REG_ZERO] = 0u;
+    hart->pc = next_pc;
     return TRAP_NONE;
 }

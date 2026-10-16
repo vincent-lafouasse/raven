@@ -79,6 +79,11 @@ enum TrapStatus execute(struct Hart hart[static 1],
                 next_pc = pc + imm;
             }
             break;
+        case OP_BEQ:
+            if (hart->x[rs1] == hart->x[rs2]) {
+                next_pc = pc + imm;
+            }
+            break;
         case OP_LUI:
             hart->x[rd] = imm;
             break;

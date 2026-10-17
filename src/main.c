@@ -5,9 +5,7 @@
 #include <string.h>
 
 #include "bus.h"
-#include "execute.h"
 #include "hart.h"
-#include "instruction.h"
 #include "loader.h"
 #include "utils.h"
 
@@ -29,13 +27,6 @@ __attribute__((noreturn)) static void die(const char* fmt, ...)
     fputc('\n', stderr);
     va_end(ap);
     exit(EXIT_FAILURE);
-}
-
-static void trap(bool cond)
-{
-    if (!cond) {
-        TRACE_TRAP();
-    }
 }
 
 static const char* load_status_str(enum LoadStatus s)
@@ -155,20 +146,9 @@ int main(int ac, char** av)
     hart_dump(&hart, hart_str);
     printf("%s\n", hart_str);
 
-    char instruction_str[INSTRUCTION_STR_LEN] = {0};
-
     while (1) {
-        u32 raw_instruction;
-        trap(bus_read(bus, hart.pc, 4, &raw_instruction) == BUS_OK);
-
-        struct Instruction instruction;
-        trap(decode_instruction(raw_instruction, &instruction) == DR_OK);
-
-        format_instruction(instruction, instruction_str);
-        printf("%s\n", instruction_str);
-
         struct Trap trap;
-        if (execute(&hart, bus, instruction, &trap) == TRAP_RAISED) {
+        if (hart_tick(&hart, bus, &trap) == TRAP_RAISED) {
             const struct TrapAction action = handle_trap(trap, &hart, bus);
             switch (action.kind) {
                 case ACTION_CONTINUE:

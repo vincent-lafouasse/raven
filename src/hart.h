@@ -1,5 +1,8 @@
 #pragma once
 
+#include "bus.h"
+#include "instruction.h"
+#include "trap.h"
 #include "types.h"
 
 #define REG_ZERO 0u
@@ -41,6 +44,11 @@ struct Hart {
 };
 
 void hart_reset(struct Hart hart[static 1], u32 entry);
+
+enum TrapStatus hart_tick(struct Hart hart[static 1],
+                          struct Bus bus[static 1],
+                          struct Trap trap_out[static 1]  // written on trap
+);
 
 // Writes pc and all 32 registers as hex, 4 registers per line, each tagged
 // with its number and ABI name, e.g.

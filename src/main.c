@@ -66,6 +66,23 @@ struct TrapAction {
     u32 value;                // FATAL
 };
 
+struct TrapAction action_exit(u8 exit_code)
+{
+    return (struct TrapAction){
+        .kind = ACTION_EXIT,
+        .exit_code = exit_code,
+    };
+}
+
+struct TrapAction action_fatal(enum FatalReason reason, u32 value)
+{
+    return (struct TrapAction){
+        .kind = ACTION_FATAL,
+        .reason = reason,
+        .value = value,
+    };
+}
+
 struct TrapAction handle_ecall(struct Hart hart[static 1],
                                struct Bus bus[static 1])
 {
@@ -75,23 +92,12 @@ struct TrapAction handle_ecall(struct Hart hart[static 1],
         case SYS_EXIT:
             // the OS only keeps 8 bits: 256 would read as 0
             if (hart->x[REG_A0] > 0xff) {
-                return (struct TrapAction){
-                    .kind = ACTION_FATAL,
-                    .reason = FATAL_BAD_EXIT_VALUE,
-                    .value = hart->x[REG_A0],
-                };
+                return action_fatal(FATAL_BAD_EXIT_VALUE, hart->x[REG_A0]);
             } else {
-                return (struct TrapAction){
-                    .kind = ACTION_EXIT,
-                    .exit_code = hart->x[REG_A0],
-                };
+                return action_exit(hart->x[REG_A0]);
             }
         default:
-            return (struct TrapAction){
-                .kind = ACTION_FATAL,
-                .reason = FATAL_UNKNOWN_SYSCALL,
-                .value = hart->x[REG_A7],
-            };
+            return action_fatal(FATAL_UNKNOWN_SYSCALL, hart->x[REG_A7]);
     }
 }
 
@@ -107,24 +113,12 @@ struct TrapAction handle_trap(struct Trap trap,
             // their own reason, so the report can say why.
             struct Instruction unused;
             if (decode_instruction(trap.tval, &unused) != DR_OK) {
-                return (struct TrapAction){
-                    .kind = ACTION_FATAL,
-                    .reason = FATAL_FAILED_DECODE,
-                    .value = trap.tval,
-                };
+                return action_fatal(FATAL_FAILED_DECODE, trap.tval);
             }
-            return (struct TrapAction){
-                .kind = ACTION_FATAL,
-                .reason = FATAL_TRAP,
-                .value = (u32)trap.cause,
-            };
+            return action_fatal(FATAL_TRAP, (u32)trap.cause);
         }
         default:
-            return (struct TrapAction){
-                .kind = ACTION_FATAL,
-                .reason = FATAL_TRAP,
-                .value = (u32)trap.cause,
-            };
+            return action_fatal(FATAL_TRAP, (u32)trap.cause);
     }
 }
 

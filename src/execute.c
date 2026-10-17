@@ -76,36 +76,36 @@ enum TrapStatus execute(struct Hart hart[static 1],
             break;
         case OP_BNE:
             if (hart->x[rs1] != hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_BEQ:
             if (hart->x[rs1] == hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_BGE:
             if ((i32)hart->x[rs1] >= (i32)hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_BGEU:
             if (hart->x[rs1] >= hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_BLT:
             if ((i32)hart->x[rs1] < (i32)hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_BLTU:
             if (hart->x[rs1] < hart->x[rs2]) {
-                next_pc = pc + imm;
+                next_pc = pc + (u32)imm;
             }
             break;
         case OP_LUI:
-            hart->x[rd] = imm;
+            hart->x[rd] = (u32)imm;
             break;
         case OP_FENCE:
             // fence is a no-op, all this is single threaded

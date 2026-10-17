@@ -55,6 +55,7 @@ enum TrapActionKind {
 enum FatalReason {
     FATAL_UNKNOWN_SYSCALL,  // value: a7
     FATAL_BAD_EXIT_VALUE,   // value: a0
+    FATAL_FAILED_DECODE,    // value: instruction bits
     FATAL_TRAP,             // value: trap cause
 };
 
@@ -101,6 +102,23 @@ struct TrapAction handle_trap(struct Trap trap,
     switch (trap.cause) {
         case CAUSE_ECALL_M:
             return handle_ecall(hart, bus);
+        case CAUSE_ILLEGAL_INSTRUCTION: {
+            // tval holds the instruction bits. Words that do not decode get
+            // their own reason, so the report can say why.
+            struct Instruction unused;
+            if (decode_instruction(trap.tval, &unused) != DR_OK) {
+                return (struct TrapAction){
+                    .kind = ACTION_FATAL,
+                    .reason = FATAL_FAILED_DECODE,
+                    .value = trap.tval,
+                };
+            }
+            return (struct TrapAction){
+                .kind = ACTION_FATAL,
+                .reason = FATAL_TRAP,
+                .value = (u32)trap.cause,
+            };
+        }
         default:
             return (struct TrapAction){
                 .kind = ACTION_FATAL,
@@ -108,6 +126,51 @@ struct TrapAction handle_trap(struct Trap trap,
                 .value = (u32)trap.cause,
             };
     }
+}
+
+static const char* decode_result_str(enum DecodeResult r)
+{
+    switch (r) {
+        case DR_OK:
+            return "ok";
+        case DR_BAD_LENGTH:
+            return "not a 32-bit instruction";
+        case DR_BAD_OPCODE:
+            return "unknown opcode";
+        case DR_BAD_FUNCT3:
+            return "bad funct3";
+        case DR_BAD_FUNCT7:
+            return "bad funct7";
+        case DR_UNSUPPORTED:
+            return "valid but unsupported";
+    }
+    return "unknown decode error";
+}
+
+__attribute__((noreturn)) static void report_fatal(
+    struct TrapAction action,
+    struct Trap trap,
+    const struct Hart hart[static 1])
+{
+    switch (action.reason) {
+        case FATAL_UNKNOWN_SYSCALL:
+            die("unknown syscall a7=0x%08x at pc=0x%08x", action.value,
+                hart->pc);
+        case FATAL_BAD_EXIT_VALUE:
+            die("exit code %u does not fit in 8 bits (pc=0x%08x)", action.value,
+                hart->pc);
+        case FATAL_FAILED_DECODE: {
+            struct Instruction unused;
+            const enum DecodeResult r =
+                decode_instruction(action.value, &unused);
+            die("failed to decode 0x%08x at pc=0x%08x: %s", action.value,
+                hart->pc, decode_result_str(r));
+        }
+        case FATAL_TRAP:
+            die("%s at pc=0x%08x (tval=0x%08x)", trap_cause_str(trap.cause),
+                hart->pc, trap.tval);
+    }
+    UNREACHABLE();
 }
 
 int main(int ac, char** av)
@@ -156,12 +219,12 @@ int main(int ac, char** av)
             const struct TrapAction action = handle_trap(trap, &hart, bus);
             switch (action.kind) {
                 case ACTION_CONTINUE:
-                    break;
+                    // no instruction was fetched, start the next tick
+                    continue;
                 case ACTION_EXIT:
                     exit(action.exit_code);
                 case ACTION_FATAL:
-                    // TODO: format error messsages
-                    die("%s\n", trap_cause_str(trap.cause));
+                    report_fatal(action, trap, &hart);
             }
         }
 
@@ -176,8 +239,7 @@ int main(int ac, char** av)
                 case ACTION_EXIT:
                     exit(action.exit_code);
                 case ACTION_FATAL:
-                    // TODO: format error messsages
-                    die("%s\n", trap_cause_str(trap.cause));
+                    report_fatal(action, trap, &hart);
             }
         }
 

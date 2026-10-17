@@ -141,7 +141,7 @@ static const char* decode_result_str(enum DecodeResult r)
     return "unknown decode error";
 }
 
-__attribute__((noreturn)) static void report_fatal(
+__attribute__((noreturn)) static void report_fatal_and_die(
     struct TrapAction action,
     struct Trap trap,
     const struct Hart hart[static 1])
@@ -218,7 +218,7 @@ int main(int ac, char** av)
                 case ACTION_EXIT:
                     exit(action.exit_code);
                 case ACTION_FATAL:
-                    report_fatal(action, trap, &hart);
+                    report_fatal_and_die(action, trap, &hart);
             }
         }
 
@@ -233,7 +233,7 @@ int main(int ac, char** av)
                 case ACTION_EXIT:
                     exit(action.exit_code);
                 case ACTION_FATAL:
-                    report_fatal(action, trap, &hart);
+                    report_fatal_and_die(action, trap, &hart);
             }
         }
 

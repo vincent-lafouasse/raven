@@ -40,7 +40,7 @@ static struct Buffer load_bytes_or_die(const char* path)
     rewind(f);
 
     u8* data = malloc(sz > 0 ? (size_t)sz : 1);
-    if (!data || fread(data, 1, sz, f) != (size_t)sz) {
+    if (!data || fread(data, 1u, (size_t)sz, f) != (size_t)sz) {
         die("cannot read %s", path);
     }
 

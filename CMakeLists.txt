@@ -14,12 +14,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 add_library(raven_flags INTERFACE)
+# Generator expressions holding several flags are written as quoted
+# `;`-separated lists.
 target_compile_options(raven_flags INTERFACE
     -Wall -Wextra -Wpedantic
-    $<$<CONFIG:Debug>:-g -O0 -fsanitize=address,undefined>
+    -Wconversion
+    -Wshadow -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition
+    -Wredundant-decls -Wformat=2 -Wcast-qual -Wpointer-arith -Wwrite-strings
+    -Wundef -Wvla -Wnull-dereference -Wdouble-promotion
+    # gcc only, clang would warn about unknown options
+    "$<$<C_COMPILER_ID:GNU>:-Wduplicated-cond;-Wduplicated-branches;-Wlogical-op;-Wjump-misses-init;-Wcast-align=strict>"
+    "$<$<C_COMPILER_ID:Clang,AppleClang>:-Wcast-align>"
+    # UBSan aborts instead of printing and continuing, so the test runner
+    # sees undefined behaviour as a failure
+    "$<$<CONFIG:Debug>:-g;-O0;-fno-omit-frame-pointer;-fsanitize=address,undefined;-fno-sanitize-recover=all>"
 )
 target_link_options(raven_flags INTERFACE
-    $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+    "$<$<CONFIG:Debug>:-fsanitize=address,undefined>"
 )
 
 add_library(raven_core STATIC

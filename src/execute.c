@@ -111,6 +111,9 @@ enum TrapStatus execute(struct Hart hart[static 1],
         case OP_LUI:
             hart->x[rd] = (u32)imm;
             break;
+        case OP_AUIPC:
+            hart->x[rd] = pc + (u32)imm;
+            break;
         case OP_FENCE:
             // fence is a no-op, all this is single threaded
             break;

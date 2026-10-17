@@ -9,8 +9,11 @@ makes QEMU a reference to compare against.
 
 ## Machine
 
-- ISA: RV32I (unprivileged base integer ISA only). No CSRs, no privilege
-  modes, no traps. `fence` is a no-op.
+- ISA: RV32I (unprivileged base integer ISA), complete and passing the
+  `rv32ui` tests. `fence` is a no-op.
+- No CSRs or privilege modes yet. Traps are raised with their RISC-V cause
+  codes, but raven handles them itself (see Environment calls) instead of
+  delivering them to a guest handler.
 - One hart. All registers start at 0, `pc` starts at the entry point.
 
 ### Memory map
@@ -42,7 +45,8 @@ milestone: machine mode with Zicsr and traps. See
 
 ## Tools
 
-- `raven`: the emulator (in progress).
+- `raven`: the emulator. `raven --flat program.bin` loads a flat binary at
+  `0x80000000` and runs it; `--elf` is not implemented yet.
 - `raven-dis`: disassembles a flat RV32I binary to GNU `as` syntax. Words
   that do not decode are printed as `.word`, so the output reassembles to the
   same bytes.
@@ -67,21 +71,13 @@ runs both through ctest.
   - `test/run-riscv-tests.sh [name...]` builds and runs them, reporting PASS,
     FAIL (a check in the test failed) or ERROR (build or raven failed).
 
-### rv32ui progress
+### rv32ui status
 
-18 of 40 pass, the other 22 stop on an instruction `execute` does not
-implement yet. Refresh with `test/run-riscv-tests.sh`.
-
-| Group                  | Passing                                  | Not yet                        |
-|------------------------|------------------------------------------|--------------------------------|
-| register-register      | `add` `sub` `and` `or` `xor` `sll` `srl` `sra` | `slt` `sltu`             |
-| register-immediate     | `addi` `andi` `ori` `xori` `slli` `srli` `srai` | `slti` `sltiu`          |
-| upper immediate        | `lui`                                    | `auipc`                        |
-| branches               | `bne`                                    | `beq` `blt` `bge` `bltu` `bgeu` |
-| jumps                  |                                          | `jal` `jalr`                   |
-| loads                  |                                          | `lb` `lbu` `lh` `lhu` `lw`     |
-| stores                 |                                          | `sb` `sh` `sw`                 |
-| mixed                  | `simple`                                 | `ld_st` `st_ld`                |
+All 40 tests pass: integer computation, upper immediates, branches, jumps,
+loads, stores and the mixed `simple`, `ld_st` and `st_ld` tests.
 
 Skipped: `fence_i` (needs Zifencei) and `ma_data` (misaligned accesses,
 which raven rejects by design).
+
+The tests are built with `-mno-relax`: linker relaxation would rewrite `la`
+into gp-relative addressing, but riscv-tests uses `gp` as the test number.

@@ -5,7 +5,7 @@ Scope: RV32 only. The C extension is planned. The long-term goal is to boot a
 
 | # | Milestone                         | Status      |
 |---|-----------------------------------|-------------|
-| 1 | RV32I, passing `rv32ui`           | in progress |
+| 1 | RV32I, passing `rv32ui`           | done        |
 | 2 | Machine mode: Zicsr and traps     | next        |
 | 3 | Interrupts: CLINT timer, `wfi`    | later       |
 | 4 | M, A, C extensions                | later       |

@@ -14,7 +14,8 @@
     "usage: raven --flat program.bin\n" \
     "       raven --elf program.elf"
 
-__attribute__((noreturn)) static void die(const char* fmt, ...)
+__attribute__((noreturn, format(printf, 1, 2))) static void die(const char* fmt,
+                                                                ...)
 {
     fflush(stdout);
 

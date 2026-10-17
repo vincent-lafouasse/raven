@@ -6,7 +6,8 @@
 #include "bitcast.h"
 #include "instruction.h"
 
-__attribute__((noreturn)) static void die(const char* fmt, ...)
+__attribute__((noreturn, format(printf, 1, 2))) static void die(const char* fmt,
+                                                                ...)
 {
     fflush(stdout);
 

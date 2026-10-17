@@ -26,7 +26,7 @@ static struct TrapAction handle_sys_exit(u32 raw_exit_code)
     if (raw_exit_code > 0xff) {
         return action_fatal(FATAL_BAD_EXIT_VALUE, raw_exit_code);
     } else {
-        return action_exit(raw_exit_code);
+        return action_exit(raw_exit_code & 0xff);
     }
 }
 

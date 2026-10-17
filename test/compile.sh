@@ -40,7 +40,9 @@ mkdir -p "$(dirname "$out")"
 elf=$out
 [ "$ext" = bin ] && elf=${out%.bin}.elf
 
-"${cross}gcc" -march=rv32i -mabi=ilp32 \
+# -mno-relax: otherwise the linker rewrites `la` into gp-relative addressing,
+# but the tests use gp as TESTNUM, so those addresses come out wrong
+"${cross}gcc" -march=rv32i -mabi=ilp32 -mno-relax \
     -nostdlib -static -Ttext=0x80000000 \
     -I "$root/test/env" \
     -I "$root/third_party/riscv-tests/isa/macros/scalar" \

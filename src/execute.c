@@ -1,5 +1,7 @@
 #include "execute.h"
 
+#include "utils.h"
+
 // arithmetic right shift without relying on implementation-defined signed >>
 static u32 sra32(u32 value, u32 shamt)
 {
@@ -9,6 +11,75 @@ static u32 sra32(u32 value, u32 shamt)
     }
     // fill the top `shamt` bits with ones
     return shifted | ~(UINT32_MAX >> shamt);
+}
+
+// The hart's load/store unit: performs a data access over the bus on behalf
+// of an instruction and reports failures as traps. Address translation and
+// permission checks (Sv32, PMP) will go here.
+//
+// On TRAP_RAISED nothing was read or written: *out is untouched.
+
+enum AccessType {
+    ACCESS_LOAD,
+    ACCESS_STORE,
+};
+
+static struct Trap data_fault(enum BusStatus status,
+                              enum AccessType access,
+                              u32 addr)
+{
+    const bool misaligned = status == BUS_MISALIGNED;
+
+    switch (access) {
+        case ACCESS_LOAD:
+            return make_trap(
+                misaligned ? CAUSE_MISALIGNED_LOAD : CAUSE_LOAD_ACCESS, addr);
+        case ACCESS_STORE:
+            return make_trap(
+                misaligned ? CAUSE_MISALIGNED_STORE : CAUSE_STORE_ACCESS, addr);
+    }
+    UNREACHABLE();
+}
+
+// Reads `size` (1, 2 or 4) bytes at `addr`, zero-extended into *out. Sign
+// extension (lb, lh) is the instruction's job, not the LSU's.
+static enum TrapStatus mem_load(struct Hart hart[static 1],
+                                struct Bus bus[static 1],
+                                u32 addr,
+                                u32 size,
+                                u32 out[static 1],
+                                struct Trap trap_out[static 1])
+{
+    (void)hart;  // translation and permissions will need its CSRs
+
+    u32 value;
+    const enum BusStatus status = bus_read(bus, addr, size, &value);
+    if (status != BUS_OK) {
+        *trap_out = data_fault(status, ACCESS_LOAD, addr);
+        return TRAP_RAISED;
+    }
+
+    *out = value;
+    return TRAP_NONE;
+}
+
+// Writes the low `size` (1, 2 or 4) bytes of `value` at `addr`.
+static enum TrapStatus mem_store(struct Hart hart[static 1],
+                                 struct Bus bus[static 1],
+                                 u32 addr,
+                                 u32 size,
+                                 u32 value,
+                                 struct Trap trap_out[static 1])
+{
+    (void)hart;  // translation and permissions will need its CSRs
+
+    const enum BusStatus status = bus_write(bus, addr, size, value);
+    if (status != BUS_OK) {
+        *trap_out = data_fault(status, ACCESS_STORE, addr);
+        return TRAP_RAISED;
+    }
+
+    return TRAP_NONE;
 }
 
 enum TrapStatus execute(struct Hart hart[static 1],

@@ -20,6 +20,16 @@ static struct TrapAction action_fatal(enum FatalReason reason, u32 value)
     };
 }
 
+static struct TrapAction handle_sys_exit(u32 raw_exit_code)
+{
+    // the OS only keeps 8 bits: 256 would read as 0
+    if (raw_exit_code > 0xff) {
+        return action_fatal(FATAL_BAD_EXIT_VALUE, raw_exit_code);
+    } else {
+        return action_exit(raw_exit_code);
+    }
+}
+
 static struct TrapAction handle_ecall(struct Hart hart[static 1],
                                       struct Bus bus[static 1])
 {
@@ -27,12 +37,7 @@ static struct TrapAction handle_ecall(struct Hart hart[static 1],
 
     switch (hart->x[REG_A7]) {
         case SYS_EXIT:
-            // the OS only keeps 8 bits: 256 would read as 0
-            if (hart->x[REG_A0] > 0xff) {
-                return action_fatal(FATAL_BAD_EXIT_VALUE, hart->x[REG_A0]);
-            } else {
-                return action_exit(hart->x[REG_A0]);
-            }
+            return handle_sys_exit(hart->x[REG_A0]);
         default:
             return action_fatal(FATAL_UNKNOWN_SYSCALL, hart->x[REG_A7]);
     }

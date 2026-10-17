@@ -38,9 +38,16 @@
 #define REG_T5 30u
 #define REG_T6 31u
 
+enum PrivilegeMode {
+    MODE_USER = 0,
+    MODE_SUPERVISOR = 1,
+    MODE_MACHINE = 3,
+};
+
 struct Hart {
     u32 x[32];
     u32 pc;
+    enum PrivilegeMode mode;
 };
 
 void hart_reset(struct Hart hart[static 1], u32 entry);

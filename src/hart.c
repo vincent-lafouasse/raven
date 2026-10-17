@@ -12,6 +12,9 @@ void hart_reset(struct Hart hart[static 1], u32 entry)
     hart->x[REG_SP] = RAM_BASE + RAM_SIZE;
 
     hart->pc = entry;
+
+    // Harts come out of reset in M-mode (privileged spec, "Reset").
+    hart->mode = MODE_MACHINE;
 }
 
 enum TrapStatus hart_fetch(struct Hart hart[static 1],

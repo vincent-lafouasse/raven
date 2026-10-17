@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "bus.h"
+#include "env.h"
 #include "hart.h"
 #include "loader.h"
 #include "utils.h"
@@ -12,9 +13,6 @@
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \
     "       raven --elf program.elf"
-
-// Linux RISC-V syscall numbers (asm-generic/unistd.h)
-#define SYS_EXIT 93
 
 __attribute__((noreturn)) static void die(const char* fmt, ...)
 {
@@ -44,82 +42,6 @@ static const char* load_status_str(enum LoadStatus s)
             return "unsupported format";
     }
     return "unknown error";
-}
-
-enum TrapActionKind {
-    ACTION_CONTINUE,
-    ACTION_EXIT,
-    ACTION_FATAL,
-};
-
-enum FatalReason {
-    FATAL_UNKNOWN_SYSCALL,  // value: a7
-    FATAL_BAD_EXIT_VALUE,   // value: a0
-    FATAL_FAILED_DECODE,    // value: instruction bits
-    FATAL_TRAP,             // value: trap cause
-};
-
-struct TrapAction {
-    enum TrapActionKind kind;
-    u8 exit_code;             // EXIT
-    enum FatalReason reason;  // FATAL
-    u32 value;                // FATAL
-};
-
-struct TrapAction action_exit(u8 exit_code)
-{
-    return (struct TrapAction){
-        .kind = ACTION_EXIT,
-        .exit_code = exit_code,
-    };
-}
-
-struct TrapAction action_fatal(enum FatalReason reason, u32 value)
-{
-    return (struct TrapAction){
-        .kind = ACTION_FATAL,
-        .reason = reason,
-        .value = value,
-    };
-}
-
-struct TrapAction handle_ecall(struct Hart hart[static 1],
-                               struct Bus bus[static 1])
-{
-    (void)bus;
-
-    switch (hart->x[REG_A7]) {
-        case SYS_EXIT:
-            // the OS only keeps 8 bits: 256 would read as 0
-            if (hart->x[REG_A0] > 0xff) {
-                return action_fatal(FATAL_BAD_EXIT_VALUE, hart->x[REG_A0]);
-            } else {
-                return action_exit(hart->x[REG_A0]);
-            }
-        default:
-            return action_fatal(FATAL_UNKNOWN_SYSCALL, hart->x[REG_A7]);
-    }
-}
-
-struct TrapAction handle_trap(struct Trap trap,
-                              struct Hart hart[static 1],
-                              struct Bus bus[static 1])
-{
-    switch (trap.cause) {
-        case CAUSE_ECALL_M:
-            return handle_ecall(hart, bus);
-        case CAUSE_ILLEGAL_INSTRUCTION: {
-            // tval holds the instruction bits. Words that do not decode get
-            // their own reason, so the report can say why.
-            struct Instruction unused;
-            if (decode_instruction(trap.tval, &unused) != DR_OK) {
-                return action_fatal(FATAL_FAILED_DECODE, trap.tval);
-            }
-            return action_fatal(FATAL_TRAP, (u32)trap.cause);
-        }
-        default:
-            return action_fatal(FATAL_TRAP, (u32)trap.cause);
-    }
 }
 
 static const char* decode_result_str(enum DecodeResult r)

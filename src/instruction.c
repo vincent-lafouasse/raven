@@ -44,33 +44,33 @@ static struct RawPayload read_payload(u32 word, enum Format fmt)
 
     switch (fmt) {
         case FMT_R:
-            out.rd = u32_get_bits(word, 7, 11);
-            out.funct3 = u32_get_bits(word, 12, 14);
-            out.rs1 = u32_get_bits(word, 15, 19);
-            out.rs2 = u32_get_bits(word, 20, 24);
-            out.funct7 = u32_get_bits(word, 25, 31);
+            out.rd = (u8)u32_get_bits(word, 7, 11);
+            out.funct3 = (u8)u32_get_bits(word, 12, 14);
+            out.rs1 = (u8)u32_get_bits(word, 15, 19);
+            out.rs2 = (u8)u32_get_bits(word, 20, 24);
+            out.funct7 = (u8)u32_get_bits(word, 25, 31);
             break;
 
         case FMT_I:
-            out.rd = u32_get_bits(word, 7, 11);
-            out.funct3 = u32_get_bits(word, 12, 14);
-            out.rs1 = u32_get_bits(word, 15, 19);
+            out.rd = (u8)u32_get_bits(word, 7, 11);
+            out.funct3 = (u8)u32_get_bits(word, 12, 14);
+            out.rs1 = (u8)u32_get_bits(word, 15, 19);
             out.imm = sign_extend(u32_get_bits(word, 20, 31), 12);
             break;
 
         case FMT_S:
-            out.funct3 = u32_get_bits(word, 12, 14);
-            out.rs1 = u32_get_bits(word, 15, 19);
-            out.rs2 = u32_get_bits(word, 20, 24);
+            out.funct3 = (u8)u32_get_bits(word, 12, 14);
+            out.rs1 = (u8)u32_get_bits(word, 15, 19);
+            out.rs2 = (u8)u32_get_bits(word, 20, 24);
             out.imm = sign_extend(
                 (u32_get_bits(word, 25, 31) << 5) | u32_get_bits(word, 7, 11),
                 12);
             break;
 
         case FMT_B:
-            out.funct3 = u32_get_bits(word, 12, 14);
-            out.rs1 = u32_get_bits(word, 15, 19);
-            out.rs2 = u32_get_bits(word, 20, 24);
+            out.funct3 = (u8)u32_get_bits(word, 12, 14);
+            out.rs1 = (u8)u32_get_bits(word, 15, 19);
+            out.rs2 = (u8)u32_get_bits(word, 20, 24);
             out.imm = sign_extend((u32_get_bits(word, 31, 31) << 12) |
                                       (u32_get_bits(word, 7, 7) << 11) |
                                       (u32_get_bits(word, 25, 30) << 5) |
@@ -79,13 +79,13 @@ static struct RawPayload read_payload(u32 word, enum Format fmt)
             break;
 
         case FMT_U:
-            out.rd = u32_get_bits(word, 7, 11);
+            out.rd = (u8)u32_get_bits(word, 7, 11);
             out.imm =
                 (i32)(word & 0xFFFFF000u);  // already shifted, low 12 bits zero
             break;
 
         case FMT_J:
-            out.rd = u32_get_bits(word, 7, 11);
+            out.rd = (u8)u32_get_bits(word, 7, 11);
             out.imm = sign_extend((u32_get_bits(word, 31, 31) << 20) |
                                       (u32_get_bits(word, 12, 19) << 12) |
                                       (u32_get_bits(word, 20, 20) << 11) |
@@ -207,7 +207,7 @@ static enum DecodeResult decode_op_imm(u32 word,
         case 1:
             if (upper == 0x00) {
                 m = OP_SLLI;
-                imm = shamt;
+                imm = (i32)shamt;
             } else {
                 return DR_BAD_FUNCT7;
             }
@@ -224,10 +224,10 @@ static enum DecodeResult decode_op_imm(u32 word,
         case 5:
             if (upper == 0x00) {
                 m = OP_SRLI;
-                imm = shamt;
+                imm = (i32)shamt;
             } else if (upper == 0x20) {
                 m = OP_SRAI;
-                imm = shamt;
+                imm = (i32)shamt;
             } else {
                 return DR_BAD_FUNCT7;
             }

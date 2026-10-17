@@ -44,6 +44,7 @@ add_library(raven_core STATIC
     src/loader.c
     src/execute.c
     src/env.c
+    src/csr.c
 )
 target_include_directories(raven_core PUBLIC src src/common)
 target_link_libraries(raven_core PUBLIC raven_flags)

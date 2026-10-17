@@ -13,6 +13,37 @@ static u32 sra32(u32 value, u32 shamt)
     return shifted | ~(UINT32_MAX >> shamt);
 }
 
+// sign extension from 8 and 16 bits, in u32 arithmetic: flipping the sign bit
+// then subtracting it borrows through all the upper bits when it was set
+static u32 sext8(u32 value)
+{
+    return ((value & 0xffu) ^ 0x80u) - 0x80u;
+}
+
+static u32 sext16(u32 value)
+{
+    return ((value & 0xffffu) ^ 0x8000u) - 0x8000u;
+}
+
+static u32 access_size(enum Mnemonic m)
+{
+    switch (m) {
+        case OP_LB:
+        case OP_LBU:
+        case OP_SB:
+            return 1;
+        case OP_LH:
+        case OP_LHU:
+        case OP_SH:
+            return 2;
+        case OP_LW:
+        case OP_SW:
+            return 4;
+        default:
+            UNREACHABLE();
+    }
+}
+
 // The hart's load/store unit: performs a data access over the bus on behalf
 // of an instruction and reports failures as traps. Address translation and
 // permission checks (Sv32, PMP) will go here.
@@ -87,8 +118,6 @@ enum TrapStatus execute(struct Hart hart[static 1],
                         struct Instruction instr,
                         struct Trap trap_out[static 1])
 {
-    (void)bus;
-
     const u8 rd = instr.rd;
     const u8 rs1 = instr.rs1;
     const u8 rs2 = instr.rs2;
@@ -195,6 +224,39 @@ enum TrapStatus execute(struct Hart hart[static 1],
             const u32 target = hart->x[rs1] + (u32)imm;
             hart->x[rd] = next_pc;
             next_pc = target;
+            break;
+        }
+        // the address is computed from rs1 before rd is written, so
+        // `lw x5, 0(x5)` works. A load into x0 still happens (and can still
+        // fault), its result is discarded when x0 is reset below.
+        case OP_LB:
+        case OP_LBU:
+        case OP_LH:
+        case OP_LHU:
+        case OP_LW: {
+            const u32 addr = hart->x[rs1] + (u32)imm;
+            u32 value;
+            if (mem_load(hart, bus, addr, access_size(instr.mnemonic), &value,
+                         trap_out) == TRAP_RAISED) {
+                return TRAP_RAISED;  // rd untouched, pc unchanged
+            }
+            if (instr.mnemonic == OP_LB) {
+                value = sext8(value);
+            } else if (instr.mnemonic == OP_LH) {
+                value = sext16(value);
+            }
+            hart->x[rd] = value;
+            break;
+        }
+        // mem_store only writes the low `size` bytes of rs2
+        case OP_SB:
+        case OP_SH:
+        case OP_SW: {
+            const u32 addr = hart->x[rs1] + (u32)imm;
+            if (mem_store(hart, bus, addr, access_size(instr.mnemonic),
+                          hart->x[rs2], trap_out) == TRAP_RAISED) {
+                return TRAP_RAISED;
+            }
             break;
         }
         case OP_LUI:

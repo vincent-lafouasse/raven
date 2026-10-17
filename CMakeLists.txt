@@ -25,6 +25,9 @@ target_compile_options(raven_flags INTERFACE
     # gcc only, clang would warn about unknown options
     "$<$<C_COMPILER_ID:GNU>:-Wduplicated-cond;-Wduplicated-branches;-Wlogical-op;-Wjump-misses-init;-Wcast-align=strict>"
     "$<$<C_COMPILER_ID:Clang,AppleClang>:-Wcast-align>"
+    # Ninja pipes compiler output, so compilers turn colors off unless forced
+    "$<$<C_COMPILER_ID:GNU>:-fdiagnostics-color=always>"
+    "$<$<C_COMPILER_ID:Clang,AppleClang>:-fcolor-diagnostics>"
     # UBSan aborts instead of printing and continuing, so the test runner
     # sees undefined behaviour as a failure
     "$<$<CONFIG:Debug>:-g;-O0;-fno-omit-frame-pointer;-fsanitize=address,undefined;-fno-sanitize-recover=all>"

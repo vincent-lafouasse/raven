@@ -14,10 +14,10 @@ void hart_reset(struct Hart hart[static 1], u32 entry)
     hart->pc = entry;
 }
 
-enum TrapStatus hart_tick(struct Hart hart[static 1],
-                          struct Bus bus[static 1],
-                          struct Trap trap_out[static 1]  // written on trap
-)
+enum TrapStatus hart_fetch(struct Hart hart[static 1],
+                           struct Bus bus[static 1],
+                           struct Instruction instr_out[static 1],
+                           struct Trap trap_out[static 1])
 {
     u32 raw_instruction;
     switch (bus_read(bus, hart->pc, 4, &raw_instruction)) {
@@ -41,7 +41,16 @@ enum TrapStatus hart_tick(struct Hart hart[static 1],
         return TRAP_RAISED;
     }
 
-    return execute(hart, bus, instruction, trap_out);
+    *instr_out = instruction;
+    return TRAP_NONE;
+}
+
+enum TrapStatus hart_execute(struct Hart hart[static 1],
+                             struct Bus bus[static 1],
+                             struct Instruction instr,
+                             struct Trap trap_out[static 1])
+{
+    return execute(hart, bus, instr, trap_out);
 }
 
 static const char* const k_abi_names[32] = {

@@ -45,10 +45,15 @@ struct Hart {
 
 void hart_reset(struct Hart hart[static 1], u32 entry);
 
-enum TrapStatus hart_tick(struct Hart hart[static 1],
-                          struct Bus bus[static 1],
-                          struct Trap trap_out[static 1]  // written on trap
-);
+enum TrapStatus hart_fetch(struct Hart hart[static 1],
+                           struct Bus bus[static 1],
+                           struct Instruction instr_out[static 1],
+                           struct Trap trap_out[static 1]);
+
+enum TrapStatus hart_execute(struct Hart hart[static 1],
+                             struct Bus bus[static 1],
+                             struct Instruction instr,
+                             struct Trap trap_out[static 1]);
 
 // Writes pc and all 32 registers as hex, 4 registers per line, each tagged
 // with its number and ABI name, e.g.

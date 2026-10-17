@@ -146,9 +146,29 @@ int main(int ac, char** av)
     hart_dump(&hart, hart_str);
     printf("%s\n", hart_str);
 
+    char instruction_str[INSTRUCTION_STR_LEN] = {0};
+
     while (1) {
         struct Trap trap;
-        if (hart_tick(&hart, bus, &trap) == TRAP_RAISED) {
+        struct Instruction instr;
+
+        if (hart_fetch(&hart, bus, &instr, &trap) == TRAP_RAISED) {
+            const struct TrapAction action = handle_trap(trap, &hart, bus);
+            switch (action.kind) {
+                case ACTION_CONTINUE:
+                    break;
+                case ACTION_EXIT:
+                    exit(action.exit_code);
+                case ACTION_FATAL:
+                    // TODO: format error messsages
+                    die("%s\n", trap_cause_str(trap.cause));
+            }
+        }
+
+        format_instruction(instr, instruction_str);
+        printf("%s\n", instruction_str);
+
+        if (hart_execute(&hart, bus, instr, &trap) == TRAP_RAISED) {
             const struct TrapAction action = handle_trap(trap, &hart, bus);
             switch (action.kind) {
                 case ACTION_CONTINUE:

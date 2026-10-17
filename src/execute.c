@@ -108,6 +108,12 @@ enum TrapStatus execute(struct Hart hart[static 1],
             hart->x[rd] = next_pc;
             next_pc = pc + (u32)imm;
             break;
+        case OP_JALR: {
+            const u32 target = hart->x[rs1] + (u32)imm;
+            hart->x[rd] = next_pc;
+            next_pc = target;
+            break;
+        }
         case OP_LUI:
             hart->x[rd] = (u32)imm;
             break;

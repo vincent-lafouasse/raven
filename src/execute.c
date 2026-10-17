@@ -74,6 +74,18 @@ enum TrapStatus execute(struct Hart hart[static 1],
         case OP_SRAI:
             hart->x[rd] = sra32(hart->x[rs1], (u32)imm);
             break;
+        case OP_SLT:
+            hart->x[rd] = (i32)hart->x[rs1] < (i32)hart->x[rs2];
+            break;
+        case OP_SLTU:
+            hart->x[rd] = hart->x[rs1] < hart->x[rs2];
+            break;
+        case OP_SLTI:
+            hart->x[rd] = (i32)hart->x[rs1] < imm;
+            break;
+        case OP_SLTIU:
+            hart->x[rd] = hart->x[rs1] < (u32)imm;
+            break;
         case OP_BNE:
             if (hart->x[rs1] != hart->x[rs2]) {
                 next_pc = pc + (u32)imm;

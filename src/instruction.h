@@ -65,6 +65,7 @@ struct Instruction {
     enum Mnemonic mnemonic;
 
     // payload, some fields might be garbage
+    // not worth the effort to make this an union
     u8 rd, rs1, rs2;
     i32 imm;
 };

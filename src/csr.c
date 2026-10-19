@@ -1,6 +1,7 @@
 #include "csr.h"
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "bit_utils.h"
 

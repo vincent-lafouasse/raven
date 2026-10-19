@@ -1,9 +1,12 @@
 #include "csr.h"
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "bit_utils.h"
+
+// RV32I no M no A no C
+#define MISA_VALUE 0x40000100
 
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
@@ -18,7 +21,12 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
-    (void)out;
+    switch (csr) {
+        case CSR_MISA:
+            *out = MISA_VALUE;
+            return CSR_OK;
+    }
+
     return CSR_NONEXISTENT;
 }
 
@@ -33,6 +41,13 @@ enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
     }
 
     (void)value;
+
+    switch (csr) {
+        case CSR_MISA:
+            // ignore the write
+            return CSR_OK;
+    }
+
     return CSR_NONEXISTENT;
 }
 

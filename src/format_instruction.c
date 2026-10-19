@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "csr.h"
+
 enum OperandForm {
     OPF_REG_REG,
     OPF_REG_IMM,
@@ -12,6 +14,8 @@ enum OperandForm {
     OPF_JUMP,
     OPF_NONE,
     OPF_FENCE,
+    OPF_CSR_REG,
+    OPF_CSR_IMM,
 };
 
 static const struct {
@@ -69,6 +73,14 @@ static const struct {
     [OP_ECALL] = {"ecall", OPF_NONE},
     [OP_EBREAK] = {"ebreak", OPF_NONE},
 
+    // Zicsr
+    [OP_CSRRW] = {"csrrw", OPF_CSR_REG},
+    [OP_CSRRS] = {"csrrs", OPF_CSR_REG},
+    [OP_CSRRC] = {"csrrc", OPF_CSR_REG},
+    [OP_CSRRWI] = {"csrrwi", OPF_CSR_IMM},
+    [OP_CSRRSI] = {"csrrsi", OPF_CSR_IMM},
+    [OP_CSRRCI] = {"csrrci", OPF_CSR_IMM},
+
     // memory ordering
     [OP_FENCE] = {"fence", OPF_FENCE},
 };
@@ -116,6 +128,22 @@ static void format_fence(struct Instruction instr,
     snprintf(out, INSTRUCTION_STR_LEN, ".word 0x%08x", word);
 }
 
+// fits the longest standard name ("mhpmcounter31h") and "0xfff"
+#define CSR_STR_LEN 16
+
+// the standard name if there is one, so the trace reads `csrrw x0, mtvec,
+// x5`; otherwise the raw address, which assemblers also accept
+static void format_csr(u16 csr, char out[static CSR_STR_LEN])
+{
+    const char* name = csr_name(csr);
+
+    if (name != NULL) {
+        snprintf(out, CSR_STR_LEN, "%s", name);
+    } else {
+        snprintf(out, CSR_STR_LEN, "0x%03x", csr);
+    }
+}
+
 void format_instruction(struct Instruction instr,
                         char out[static INSTRUCTION_STR_LEN])
 {
@@ -159,5 +187,19 @@ void format_instruction(struct Instruction instr,
         case OPF_FENCE:
             format_fence(instr, out);
             break;
+        case OPF_CSR_REG: {
+            char csr[CSR_STR_LEN];
+            format_csr(instr.csr, csr);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %s, x%d", name,
+                     instr.rd, csr, instr.rs1);
+            break;
+        }
+        case OPF_CSR_IMM: {
+            char csr[CSR_STR_LEN];
+            format_csr(instr.csr, csr);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %s, %d", name, instr.rd,
+                     csr, instr.imm);
+            break;
+        }
     }
 }

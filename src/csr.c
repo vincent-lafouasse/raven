@@ -2,9 +2,7 @@
 
 #include <stddef.h>
 
-enum CsrStatus csr_read(const struct Hart hart[static 1],
-                        u32 csr,
-                        u32 out[static 1])
+enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 {
     (void)hart;
     (void)csr;
@@ -13,7 +11,7 @@ enum CsrStatus csr_read(const struct Hart hart[static 1],
     return CSR_NONEXISTENT;
 }
 
-enum CsrStatus csr_write(struct Hart hart[static 1], u32 csr, u32 value)
+enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
 {
     (void)hart;
     (void)csr;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hart.h"
+#include "privilege.h"
 #include "types.h"
 
 #define CSR_MSTATUS 0x300u
@@ -42,10 +42,8 @@ enum CsrStatus {
     CSR_READ_ONLY,
 };
 
-enum CsrStatus csr_read(const struct Hart hart[static 1],
-                        u32 csr,
-                        u32 out[static 1]);
+enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode);
 
-enum CsrStatus csr_write(struct Hart hart[static 1], u32 csr, u32 value);
+enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode);
 
 const char* csr_name(u32 csr);

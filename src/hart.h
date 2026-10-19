@@ -1,6 +1,7 @@
 #pragma once
 
 #include "bus.h"
+#include "csr.h"
 #include "instruction.h"
 #include "privilege.h"
 #include "trap.h"
@@ -43,6 +44,7 @@ struct Hart {
     u32 x[32];
     u32 pc;
     enum PrivilegeMode mode;
+    struct Csr csr;
 };
 
 void hart_reset(struct Hart hart[static 1], u32 entry);

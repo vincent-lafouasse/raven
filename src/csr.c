@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "bit_utils.h"
+
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 {
     (void)mode;
@@ -13,11 +15,12 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 
 enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
 {
+    if (u32_get_bits(csr, 10, 11) == 3) {
+        return CSR_READ_ONLY;
+    }
+
     (void)mode;
-    (void)csr;
     (void)value;
-    // TODO: implement the machine-mode CSRs, CSR_READ_ONLY when bits 11:10
-    // are 0b11
     return CSR_NONEXISTENT;
 }
 

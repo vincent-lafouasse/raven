@@ -91,6 +91,9 @@ enum DecodeResult {
 enum DecodeResult decode_instruction(u32 word,
                                      struct Instruction out[static 1]);
 
+// ABI name of integer register x0..x31 ("zero", "ra", "sp", ...)
+const char* reg_name(u8 reg);
+
 // enough for any formatted instruction, including the `.word` fallback
 #define INSTRUCTION_STR_LEN 128
 

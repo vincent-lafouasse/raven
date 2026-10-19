@@ -1,5 +1,6 @@
 #include "instruction.h"
 
+#include <assert.h>
 #include <stdio.h>
 
 #include "csr.h"
@@ -85,6 +86,18 @@ static const struct {
     [OP_FENCE] = {"fence", OPF_FENCE},
 };
 
+static const char* const k_abi_names[32] = {
+    "zero", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+    "a1",   "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+    "s6",   "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6",
+};
+
+const char* reg_name(u8 reg)
+{
+    assert(reg < 32);
+    return k_abi_names[reg];
+}
+
 // writes a fence predecessor/successor set as a subset of "iorw"
 static void format_fence_set(u32 set, char out[static 5])
 {
@@ -152,34 +165,35 @@ void format_instruction(struct Instruction instr,
 
     switch (form) {
         case OPF_REG_REG:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, x%d", name,
-                     instr.rd, instr.rs1, instr.rs2);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s, %s", name,
+                     reg_name(instr.rd), reg_name(instr.rs1),
+                     reg_name(instr.rs2));
             break;
         case OPF_REG_IMM:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, %d", name,
-                     instr.rd, instr.rs1, instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s, %d", name,
+                     reg_name(instr.rd), reg_name(instr.rs1), instr.imm);
             break;
         case OPF_LOAD:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %d(x%d)", name,
-                     instr.rd, instr.imm, instr.rs1);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %d(%s)", name,
+                     reg_name(instr.rd), instr.imm, reg_name(instr.rs1));
             break;
         case OPF_STORE:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %d(x%d)", name,
-                     instr.rs2, instr.imm, instr.rs1);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %d(%s)", name,
+                     reg_name(instr.rs2), instr.imm, reg_name(instr.rs1));
             break;
         case OPF_BRANCH:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, x%d, .%+d", name,
-                     instr.rs1, instr.rs2, instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s, .%+d", name,
+                     reg_name(instr.rs1), reg_name(instr.rs2), instr.imm);
             break;
         case OPF_UPPER_IMM:
             // stored imm is already shifted, the assembler wants the 20-bit
             // value
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, 0x%x", name, instr.rd,
-                     (u32)instr.imm >> 12);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, 0x%x", name,
+                     reg_name(instr.rd), (u32)instr.imm >> 12);
             break;
         case OPF_JUMP:
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, .%+d", name, instr.rd,
-                     instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, .%+d", name,
+                     reg_name(instr.rd), instr.imm);
             break;
         case OPF_NONE:
             snprintf(out, INSTRUCTION_STR_LEN, "%s", name);
@@ -190,15 +204,15 @@ void format_instruction(struct Instruction instr,
         case OPF_CSR_REG: {
             char csr[CSR_STR_LEN];
             format_csr(instr.csr, csr);
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %s, x%d", name,
-                     instr.rd, csr, instr.rs1);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s, %s", name,
+                     reg_name(instr.rd), csr, reg_name(instr.rs1));
             break;
         }
         case OPF_CSR_IMM: {
             char csr[CSR_STR_LEN];
             format_csr(instr.csr, csr);
-            snprintf(out, INSTRUCTION_STR_LEN, "%s x%d, %s, %d", name, instr.rd,
-                     csr, instr.imm);
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s, %d", name,
+                     reg_name(instr.rd), csr, instr.imm);
             break;
         }
     }

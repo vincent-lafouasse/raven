@@ -8,8 +8,6 @@
 #define MISA_RV32 (1 << 30)
 #define MISA_I (1 << 8)
 
-#define MISA_VALUE (MISA_RV32 | MISA_I)
-
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
     const u32 necessary_privilege_mode = u32_get_bits(csr, 8, 9);
@@ -25,7 +23,7 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 
     switch (csr) {
         case CSR_MISA:
-            *out = MISA_VALUE;
+            *out = MISA_RV32 | MISA_I;
             return CSR_OK;
     }
 

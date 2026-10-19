@@ -30,6 +30,7 @@ enum Format {
     FMT_U,
     FMT_J,
     FMT_B,
+    FMT_CSR,
 };
 
 struct RawPayload {
@@ -92,6 +93,13 @@ static struct RawPayload read_payload(u32 word, enum Format fmt)
                                       (u32_get_bits(word, 20, 20) << 11) |
                                       (u32_get_bits(word, 21, 30) << 1),
                                   21);
+            break;
+
+        case FMT_CSR:
+            out.rd = (u8)u32_get_bits(word, 7, 11);
+            out.funct3 = (u8)u32_get_bits(word, 12, 14);
+            out.rs1 = (u8)u32_get_bits(word, 15, 19);
+            out.csr = (u16)u32_get_bits(word, 20, 31);
             break;
     }
 

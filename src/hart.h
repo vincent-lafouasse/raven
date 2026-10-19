@@ -2,6 +2,7 @@
 
 #include "bus.h"
 #include "instruction.h"
+#include "privilege.h"
 #include "trap.h"
 #include "types.h"
 
@@ -37,12 +38,6 @@
 #define REG_T4 29u
 #define REG_T5 30u
 #define REG_T6 31u
-
-enum PrivilegeMode {
-    MODE_USER = 0,
-    MODE_SUPERVISOR = 1,
-    MODE_MACHINE = 3,
-};
 
 struct Hart {
     u32 x[32];

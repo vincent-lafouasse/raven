@@ -4,14 +4,7 @@
 #include <stdbool.h>
 
 #include "debug.h"
-
-static u32 u32_get_bits(u32 data, u8 start, u8 end)
-{
-    assert(start <= end && end < 32);
-
-    const u32 mask = UINT32_MAX >> (31 - (end - start));
-    return (data >> start) & mask;
-}
+#include "bit_utils.h"
 
 static i32 sign_extend(u32 value, u8 width)
 {

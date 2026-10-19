@@ -4,7 +4,7 @@
 
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 {
-    (void)hart;
+    (void)mode;
     (void)csr;
     (void)out;
     // TODO: implement the machine-mode CSRs
@@ -13,7 +13,7 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 
 enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
 {
-    (void)hart;
+    (void)mode;
     (void)csr;
     (void)value;
     // TODO: implement the machine-mode CSRs, CSR_READ_ONLY when bits 11:10

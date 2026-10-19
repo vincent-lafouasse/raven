@@ -25,6 +25,9 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
         case CSR_MISA:
             *out = MISA_RV32 | MISA_I;
             return CSR_OK;
+        case CSR_MVENDORID:
+            *out = 0;
+            return CSR_OK;
     }
 
     return CSR_NONEXISTENT;

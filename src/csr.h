@@ -32,6 +32,10 @@
 #define CSR_MIMPID 0xf13u
 #define CSR_MHARTID 0xf14u
 
+#define MSTATUS_MIE (1u << 3)
+#define MSTATUS_MPIE (1u << 7)
+#define MSTATUS_MPP (3u << 11)
+
 struct Csr {
     u32 mstatus, misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
 };

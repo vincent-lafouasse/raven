@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "bitcast.h"
-#include "utils.h"
+#include "debug.h"
 
 static enum BusStatus ram_offset(u32 addr, u32 size, u32 offset[static 1])
 {

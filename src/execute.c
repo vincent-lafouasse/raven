@@ -1,6 +1,6 @@
 #include "execute.h"
 
-#include "utils.h"
+#include "debug.h"
 
 // arithmetic right shift without relying on implementation-defined signed >>
 static u32 sra32(u32 value, u32 shamt)

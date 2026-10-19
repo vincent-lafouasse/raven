@@ -6,9 +6,9 @@
 
 #include "bus.h"
 #include "env.h"
+#include "debug.h"
 #include "hart.h"
 #include "loader.h"
-#include "utils.h"
 
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \

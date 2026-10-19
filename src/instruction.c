@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "utils.h"
+#include "debug.h"
 
 static u32 u32_get_bits(u32 data, u8 start, u8 end)
 {

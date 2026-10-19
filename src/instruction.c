@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "debug.h"
 #include "bit_utils.h"
+#include "debug.h"
 
 static i32 sign_extend(u32 value, u8 width)
 {

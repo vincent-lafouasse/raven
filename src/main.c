@@ -5,8 +5,8 @@
 #include <string.h>
 
 #include "bus.h"
-#include "env.h"
 #include "debug.h"
+#include "env.h"
 #include "hart.h"
 #include "loader.h"
 

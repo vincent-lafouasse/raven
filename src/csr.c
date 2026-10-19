@@ -27,6 +27,12 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
             return CSR_OK;
         case CSR_MVENDORID:
             *out = 0;  // not implemented
+        case CSR_MARCHID:
+            *out = 0;  // not implemented
+        case CSR_MIMPID:
+            *out = 0;  // not implemented
+        case CSR_MHARTID:
+            *out = 0;  // one 1 hart with id 0
             return CSR_OK;
     }
 

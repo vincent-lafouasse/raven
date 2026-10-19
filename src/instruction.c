@@ -36,6 +36,7 @@ struct RawPayload {
     u8 rd, rs1, rs2;
     u8 funct3, funct7;
     i32 imm;
+    u16 csr;
 };
 
 static struct RawPayload read_payload(u32 word, enum Format fmt)

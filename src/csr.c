@@ -7,9 +7,9 @@
 
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
-    const u8 necessary_privilege_mode = (u8)u32_get_bits(csr, 8, 9);
+    const u32 necessary_privilege_mode = u32_get_bits(csr, 8, 9);
 
-    return (u8)mode >= necessary_privilege_mode;
+    return (u32)mode >= necessary_privilege_mode;
 }
 
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)

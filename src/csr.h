@@ -40,7 +40,8 @@ enum CsrStatus {
     CSR_OK,
     CSR_NONEXISTENT,
     CSR_READ_ONLY,
-    CSR_INSUFFICIENT_PRIVILEGE,
+    // not needed until i have more than Machine mode
+    // CSR_INSUFFICIENT_PRIVILEGE,
 };
 
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode);

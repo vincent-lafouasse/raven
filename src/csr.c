@@ -5,8 +5,10 @@
 
 #include "bit_utils.h"
 
-// RV32I no M no A no C
-#define MISA_VALUE 0x40000100
+#define MISA_RV32 (1 << 30)
+#define MISA_I (1 << 8)
+
+#define MISA_VALUE (MISA_RV32 | MISA_I)
 
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {

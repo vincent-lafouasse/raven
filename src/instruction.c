@@ -407,20 +407,64 @@ static enum DecodeResult decode_auipc(u32 word,
 static enum DecodeResult decode_system(u32 word,
                                        struct Instruction out[static 1])
 {
-    // ECALL and EBREAK are the only SYSTEM instructions in RV32I, and they
-    // have no operands, so the whole word is fixed.
-    switch (word) {
-        case 0x00000073:
-            *out = (struct Instruction){.raw = word, .mnemonic = OP_ECALL};
-            return DR_OK;
-        case 0x00100073:
-            *out = (struct Instruction){.raw = word, .mnemonic = OP_EBREAK};
-            return DR_OK;
-        default:
-            // CSR instructions (funct3 != 0) and privileged ones (MRET, WFI,
-            // ...) are legal RISC-V, just not part of RV32I
+    const struct RawPayload data = read_payload(word, FMT_CSR);
+
+    enum Mnemonic m;
+
+    switch (data.funct3) {
+        case 0:
+            // privileged instructions, each identified by its whole word
+            // since they have no operands
+            switch (word) {
+                case 0x00000073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_ECALL};
+                    return DR_OK;
+                case 0x00100073:
+                    *out = (struct Instruction){.raw = word,
+                                                .mnemonic = OP_EBREAK};
+                    return DR_OK;
+                default:
+                    // MRET, WFI, SFENCE.VMA, ... are legal RISC-V, just
+                    // not implemented yet
+                    return DR_UNSUPPORTED;
+            }
+        case 1:
+            m = OP_CSRRW;
+            break;
+        case 2:
+            m = OP_CSRRS;
+            break;
+        case 3:
+            m = OP_CSRRC;
+            break;
+        case 4:
+            // the hypervisor extension's loads/stores (HLV, HSV)
             return DR_UNSUPPORTED;
+        case 5:
+            m = OP_CSRRWI;
+            break;
+        case 6:
+            m = OP_CSRRSI;
+            break;
+        case 7:
+            m = OP_CSRRCI;
+            break;
+        default:
+            UNREACHABLE();
     }
+
+    *out = (struct Instruction){
+        .raw = word, .mnemonic = m, .rd = data.rd, .csr = data.csr};
+
+    // funct3 bit 2 selects the immediate forms, where bits 19:15 are uimm
+    if (data.funct3 & 0x4) {
+        out->imm = data.rs1;
+    } else {
+        out->rs1 = data.rs1;
+    }
+
+    return DR_OK;
 }
 
 static enum DecodeResult decode_misc_mem(u32 word,

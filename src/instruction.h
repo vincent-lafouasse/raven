@@ -54,6 +54,14 @@ enum Mnemonic {
     OP_ECALL,
     OP_EBREAK,
 
+    // Zicsr
+    OP_CSRRW,
+    OP_CSRRS,
+    OP_CSRRC,
+    OP_CSRRWI,
+    OP_CSRRSI,
+    OP_CSRRCI,
+
     // memory ordering
     // imm holds the raw, zero-extended bits 31:20: fm (11:8), pred (7:4),
     // succ (3:0), each set ordered i, o, r, w from msb to lsb
@@ -68,6 +76,7 @@ struct Instruction {
     // not worth the effort to make this an union
     u8 rd, rs1, rs2;
     i32 imm;
+    u16 csr;
 };
 
 enum DecodeResult {

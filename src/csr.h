@@ -32,6 +32,10 @@
 #define CSR_MIMPID 0xf13u
 #define CSR_MHARTID 0xf14u
 
+struct Csr {
+    u32 mstatus, misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
+};
+
 enum CsrStatus {
     CSR_OK,
     CSR_NONEXISTENT,

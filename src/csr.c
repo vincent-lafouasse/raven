@@ -14,10 +14,11 @@ static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
 {
-    (void)mode;
-    (void)csr;
+    if (!csr_can_access(csr, mode)) {
+        return CSR_INSUFFICIENT_PRIVILEGE;
+    }
+
     (void)out;
-    // TODO: implement the machine-mode CSRs
     return CSR_NONEXISTENT;
 }
 
@@ -27,7 +28,10 @@ enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
         return CSR_READ_ONLY;
     }
 
-    (void)mode;
+    if (!csr_can_access(csr, mode)) {
+        return CSR_INSUFFICIENT_PRIVILEGE;
+    }
+
     (void)value;
     return CSR_NONEXISTENT;
 }

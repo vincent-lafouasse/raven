@@ -34,10 +34,6 @@
 #define CSR_MIMPID 0xf13u
 #define CSR_MHARTID 0xf14u
 
-#define MSTATUS_MIE (1u << 3)
-#define MSTATUS_MPIE (1u << 7)
-#define MSTATUS_MPP (3u << 11)
-
 #define MISA_RV32 (1 << 30)
 #define MISA_I (1 << 8)
 
@@ -51,7 +47,15 @@ static u32 mstatus_pack(struct Mstatus s)
     return mstatus;
 }
 
-static struct Mstatus mstatus_write(struct Mstatus old, u32 value);
+static struct Mstatus mstatus_write(struct Mstatus old, u32 value)
+{
+    const u32 new_mie = u32_get_bits(value, 3, 3);
+    const u32 new_mpie = u32_get_bits(value, 7, 7);
+
+    old.mie = new_mie;
+    old.mpie = new_mpie;
+    return old;
+}
 
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {

@@ -8,6 +8,17 @@
 #define MISA_RV32 (1 << 30)
 #define MISA_I (1 << 8)
 
+#define MSTATUS_MIE (1u << 3)
+#define MSTATUS_MPIE (1u << 7)
+#define MSTATUS_MPP (3u << 11)
+
+
+static u32 mstatus_pack(struct Mstatus s)
+{
+}
+
+static struct Mstatus mstatus_write(struct Mstatus old, u32 value);
+
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
     const u32 necessary_privilege_mode = u32_get_bits(csr, 8, 9);
@@ -39,7 +50,7 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
     return CSR_NONEXISTENT;
 }
 
-enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
+enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode, struct Csr registers[static 1])
 {
     if (u32_get_bits(csr, 10, 11) == 3) {
         return CSR_READ_ONLY;
@@ -50,6 +61,7 @@ enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode)
     }
 
     (void)value;
+    (void)registers;
 
     switch (csr) {
         case CSR_MISA:

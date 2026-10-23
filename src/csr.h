@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "privilege.h"
+#include "trap.h"
 #include "types.h"
 
 struct Mstatus {
@@ -23,6 +24,8 @@ enum CsrStatus {
 };
 
 struct Csr csr_new(void);
+
+void csr_take_trap(struct Csr csr[static 1], struct Trap trap);
 
 enum CsrStatus csr_read(u32 csr,
                         u32 out[static 1],

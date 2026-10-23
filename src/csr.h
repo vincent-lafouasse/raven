@@ -25,7 +25,7 @@ enum CsrStatus {
 
 struct Csr csr_new(void);
 
-void csr_take_trap(struct Csr csr[static 1], struct Trap trap);
+void csr_take_trap(struct Csr csr[static 1], struct Trap trap, u32 pc);
 
 enum CsrStatus csr_read(u32 index,
                         u32 out[static 1],

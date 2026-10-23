@@ -49,8 +49,8 @@ static u32 mstatus_pack(struct Mstatus s)
 
 static struct Mstatus mstatus_write(struct Mstatus old, u32 value)
 {
-    const u32 new_mie = u32_get_bits(value, 3, 3);
-    const u32 new_mpie = u32_get_bits(value, 7, 7);
+    const bool new_mie = u32_get_bits(value, 3, 3);
+    const bool new_mpie = u32_get_bits(value, 7, 7);
 
     old.mie = new_mie;
     old.mpie = new_mpie;

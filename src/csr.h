@@ -11,7 +11,7 @@ struct Mstatus {
 };
 
 struct Csr {
-    u32 mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
+    u32 mie, mtvec, mstatush, mscratch, mcause, mtval, mip, mepc;
     struct Mstatus mstatus;
 };
 

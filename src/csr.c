@@ -87,19 +87,26 @@ enum CsrStatus csr_read(u32 csr,
             *out = MISA_RV32 | MISA_I;
             return CSR_OK;
         case CSR_MSTATUS:
-            return mstatus_pack(registers.mstatus);
+            *out = mstatus_pack(registers.mstatus);
+            return CSR_OK;
         case CSR_MTVAL:
-            return registers.mtval;
+            *out = registers.mtval;
+            return CSR_OK;
         case CSR_MSCRATCH:
-            return registers.mscratch;
+            *out = registers.mscratch;
+            return CSR_OK;
         case CSR_MCAUSE:
-            return registers.mcause;
+            *out = registers.mcause;
+            return CSR_OK;
         case CSR_MVENDORID:
             *out = 0;  // not implemented
+            return CSR_OK;
         case CSR_MARCHID:
             *out = 0;  // not implemented
+            return CSR_OK;
         case CSR_MIMPID:
             *out = 0;  // not implemented
+            return CSR_OK;
         case CSR_MHARTID:
             *out = 0;  // one 1 hart with id 0
             return CSR_OK;

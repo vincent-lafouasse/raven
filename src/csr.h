@@ -11,7 +11,8 @@ struct Mstatus {
 };
 
 struct Csr {
-    u32 mstatus, misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
+    u32 misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
+    struct Mstatus mstatus;
 };
 
 enum CsrStatus {

@@ -64,12 +64,16 @@ static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
     return (u32)mode >= necessary_privilege_mode;
 }
 
-enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
+enum CsrStatus csr_read(u32 csr,
+                        u32 out[static 1],
+                        enum PrivilegeMode mode,
+                        struct Csr registers)
 {
     if (!csr_can_access(csr, mode)) {
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
+    (void)registers;
     switch (csr) {
         case CSR_MISA:
             *out = MISA_RV32 | MISA_I;

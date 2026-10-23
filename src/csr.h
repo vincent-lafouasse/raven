@@ -21,7 +21,10 @@ enum CsrStatus {
     CSR_INSUFFICIENT_PRIVILEGE,
 };
 
-enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode);
+enum CsrStatus csr_read(u32 csr,
+                        u32 out[static 1],
+                        enum PrivilegeMode mode,
+                        struct Csr registers);
 
 enum CsrStatus csr_write(u32 csr,
                          u32 value,

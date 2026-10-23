@@ -113,10 +113,10 @@ enum CsrStatus csr_write(u32 csr,
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
-    (void)value;
-    (void)registers;
-
     switch (csr) {
+        case CSR_MSTATUS:
+            registers->mstatus = mstatus_write(registers->mstatus, value);
+            return CSR_OK;
         case CSR_MISA:
             // ignore the write
             return CSR_OK;

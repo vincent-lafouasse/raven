@@ -73,7 +73,6 @@ enum CsrStatus csr_read(u32 csr,
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
-    (void)registers;
     switch (csr) {
         case CSR_MISA:
             *out = MISA_RV32 | MISA_I;

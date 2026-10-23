@@ -66,6 +66,22 @@ struct Csr csr_new(void)
     };
 }
 
+void csr_take_trap(struct Csr csr[static 1],
+                   struct Trap trap,
+                   u32 pc,
+                   enum PrivilegeMode mode)
+{
+    csr->mepc = pc;
+    csr->mcause = (u32)trap.cause;
+    csr->mtval = trap.tval;
+
+    // a one-deep stack: push the interrupt enable and the mode, then disable
+    // interrupts so the handler can save state before anything else traps
+    csr->mstatus.mpie = csr->mstatus.mie;
+    csr->mstatus.mie = false;
+    csr->mstatus.mpp = mode;
+}
+
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
     const u32 necessary_privilege_mode = u32_get_bits(csr, 8, 9);

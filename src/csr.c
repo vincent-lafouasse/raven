@@ -98,6 +98,24 @@ enum CsrStatus csr_read(u32 index,
         case CSR_MCAUSE:
             *out = csr.mcause;
             return CSR_OK;
+        case CSR_MEPC:
+            *out = csr.mepc;
+            return CSR_OK;
+        case CSR_MTVEC:
+            *out = csr.mtvec;
+            return CSR_OK;
+        case CSR_MIE:
+            *out = csr.mie;
+            return CSR_OK;
+        case CSR_MIP:
+            // no interrupt sources yet. Later: computed from the device
+            // lines (MTIP from the CLINT, MEIP from the PLIC), not stored
+            *out = 0;
+            return CSR_OK;
+        case CSR_MSTATUSH:
+            // no big-endian support and no H extension: hardwired to 0
+            *out = 0;
+            return CSR_OK;
         case CSR_MVENDORID:
             *out = 0;  // not implemented
             return CSR_OK;
@@ -140,6 +158,24 @@ enum CsrStatus csr_write(u32 index,
             return CSR_OK;
         case CSR_MCAUSE:
             csr->mcause = value;
+            return CSR_OK;
+        case CSR_MEPC:
+            // bit 0 is always 0, and without C so is bit 1
+            csr->mepc = value & ~3u;
+            return CSR_OK;
+        case CSR_MTVEC:
+            // only direct mode is supported, so MODE (bits 1:0) reads 0
+            csr->mtvec = value & ~3u;
+            return CSR_OK;
+        case CSR_MIE:
+            // MSIE, MTIE, MEIE: one enable per M-level interrupt source
+            csr->mie = value & INTERRUPT_ENABLE_MASK;
+            return CSR_OK;
+        case CSR_MIP:
+            // M-only: software can't set or clear any pending bit here
+            return CSR_OK;
+        case CSR_MSTATUSH:
+            // hardwired to 0, see csr_read
             return CSR_OK;
         case CSR_MISA:
             // ignore the write

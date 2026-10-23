@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdbool.h>
+
 #include "privilege.h"
 #include "types.h"
 
@@ -57,6 +59,6 @@ enum CsrStatus {
 
 enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode);
 
-enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode);
+enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode, struct Csr registers[static 1]);
 
 const char* csr_name(u32 csr);

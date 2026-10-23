@@ -88,7 +88,10 @@ enum CsrStatus csr_read(u32 csr, u32 out[static 1], enum PrivilegeMode mode)
     return CSR_NONEXISTENT;
 }
 
-enum CsrStatus csr_write(u32 csr, u32 value, enum PrivilegeMode mode, struct Csr registers[static 1])
+enum CsrStatus csr_write(u32 csr,
+                         u32 value,
+                         enum PrivilegeMode mode,
+                         struct Csr registers[static 1])
 {
     if (u32_get_bits(csr, 10, 11) == 3) {
         return CSR_READ_ONLY;

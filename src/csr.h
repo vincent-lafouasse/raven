@@ -36,6 +36,14 @@
 #define MSTATUS_MPIE (1u << 7)
 #define MSTATUS_MPP (3u << 11)
 
+struct Mstatus {
+    bool mie, mpie;
+    enum PrivilegeMode mpp;
+};
+
+static u32 mstatus_pack(struct Mstatus s);
+static struct Mstatus mstatus_write(struct Mstatus old, u32 value);
+
 struct Csr {
     u32 mstatus, misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
 };

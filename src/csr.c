@@ -57,6 +57,13 @@ static struct Mstatus mstatus_write(struct Mstatus old, u32 value)
     return old;
 }
 
+struct Csr csr_new(void)
+{
+    return (struct Csr){
+        .mstatus = {.mie = false, .mpie = false, .mpp = MODE_MACHINE},
+    };
+}
+
 static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
 {
     const u32 necessary_privilege_mode = u32_get_bits(csr, 8, 9);

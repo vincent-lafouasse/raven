@@ -41,13 +41,14 @@
 #define MISA_RV32 (1 << 30)
 #define MISA_I (1 << 8)
 
-#define MSTATUS_MIE (1u << 3)
-#define MSTATUS_MPIE (1u << 7)
-#define MSTATUS_MPP (3u << 11)
-
-
 static u32 mstatus_pack(struct Mstatus s)
 {
+    u32 mstatus = 0;
+
+    mstatus |= (s.mie ? 1u : 0u) << 3;
+    mstatus |= (s.mpie ? 1u : 0u) << 7;
+    mstatus |= (u32)s.mpp << 11;
+    return mstatus;
 }
 
 static struct Mstatus mstatus_write(struct Mstatus old, u32 value);

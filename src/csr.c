@@ -73,30 +73,30 @@ static bool csr_can_access(u32 csr, enum PrivilegeMode mode)
     return (u32)mode >= necessary_privilege_mode;
 }
 
-enum CsrStatus csr_read(u32 csr,
+enum CsrStatus csr_read(u32 index,
                         u32 out[static 1],
                         enum PrivilegeMode mode,
-                        struct Csr registers)
+                        struct Csr csr)
 {
-    if (!csr_can_access(csr, mode)) {
+    if (!csr_can_access(index, mode)) {
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
-    switch (csr) {
+    switch (index) {
         case CSR_MISA:
             *out = MISA_RV32 | MISA_I;
             return CSR_OK;
         case CSR_MSTATUS:
-            *out = mstatus_pack(registers.mstatus);
+            *out = mstatus_pack(csr.mstatus);
             return CSR_OK;
         case CSR_MTVAL:
-            *out = registers.mtval;
+            *out = csr.mtval;
             return CSR_OK;
         case CSR_MSCRATCH:
-            *out = registers.mscratch;
+            *out = csr.mscratch;
             return CSR_OK;
         case CSR_MCAUSE:
-            *out = registers.mcause;
+            *out = csr.mcause;
             return CSR_OK;
         case CSR_MVENDORID:
             *out = 0;  // not implemented
@@ -115,31 +115,31 @@ enum CsrStatus csr_read(u32 csr,
     return CSR_NONEXISTENT;
 }
 
-enum CsrStatus csr_write(u32 csr,
+enum CsrStatus csr_write(u32 index,
                          u32 value,
                          enum PrivilegeMode mode,
-                         struct Csr registers[static 1])
+                         struct Csr csr[static 1])
 {
-    if (u32_get_bits(csr, 10, 11) == 3) {
+    if (u32_get_bits(index, 10, 11) == 3) {
         return CSR_READ_ONLY;
     }
 
-    if (!csr_can_access(csr, mode)) {
+    if (!csr_can_access(index, mode)) {
         return CSR_INSUFFICIENT_PRIVILEGE;
     }
 
-    switch (csr) {
+    switch (index) {
         case CSR_MSTATUS:
-            registers->mstatus = mstatus_write(registers->mstatus, value);
+            csr->mstatus = mstatus_write(csr->mstatus, value);
             return CSR_OK;
         case CSR_MTVAL:
-            registers->mtval = value;
+            csr->mtval = value;
             return CSR_OK;
         case CSR_MSCRATCH:
-            registers->mscratch = value;
+            csr->mscratch = value;
             return CSR_OK;
         case CSR_MCAUSE:
-            registers->mcause = value;
+            csr->mcause = value;
             return CSR_OK;
         case CSR_MISA:
             // ignore the write

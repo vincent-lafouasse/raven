@@ -27,14 +27,14 @@ struct Csr csr_new(void);
 
 void csr_take_trap(struct Csr csr[static 1], struct Trap trap);
 
-enum CsrStatus csr_read(u32 csr,
+enum CsrStatus csr_read(u32 index,
                         u32 out[static 1],
                         enum PrivilegeMode mode,
-                        struct Csr registers);
+                        struct Csr csr);
 
-enum CsrStatus csr_write(u32 csr,
+enum CsrStatus csr_write(u32 index,
                          u32 value,
                          enum PrivilegeMode mode,
-                         struct Csr registers[static 1]);
+                         struct Csr csr[static 1]);
 
 const char* csr_name(u32 csr);

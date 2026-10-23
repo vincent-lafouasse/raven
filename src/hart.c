@@ -13,7 +13,6 @@ void hart_reset(struct Hart hart[static 1], u32 entry)
 
     hart->pc = entry;
 
-    // Harts come out of reset in M-mode (privileged spec, "Reset").
     hart->mode = MODE_MACHINE;
 
     hart->csr = csr_new();

@@ -34,6 +34,8 @@
 #define CSR_MIMPID 0xf13u
 #define CSR_MHARTID 0xf14u
 
+#define INTERRUPT_ENABLE_MASK 0x888
+
 #define MISA_RV32 (1 << 30)
 #define MISA_I (1 << 8)
 

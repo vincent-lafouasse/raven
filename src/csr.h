@@ -10,9 +10,6 @@ struct Mstatus {
     enum PrivilegeMode mpp;
 };
 
-static u32 mstatus_pack(struct Mstatus s);
-static struct Mstatus mstatus_write(struct Mstatus old, u32 value);
-
 struct Csr {
     u32 mstatus, misa, mie, mtvec, mstatush, mscratch, mcause, mtval, mip;
 };

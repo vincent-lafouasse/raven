@@ -86,6 +86,12 @@ enum CsrStatus csr_read(u32 csr,
             return CSR_OK;
         case CSR_MSTATUS:
             return mstatus_pack(registers.mstatus);
+        case CSR_MTVAL:
+            return registers.mtval;
+        case CSR_MSCRATCH:
+            return registers.mscratch;
+        case CSR_MCAUSE:
+            return registers.mcause;
         case CSR_MVENDORID:
             *out = 0;  // not implemented
         case CSR_MARCHID:
@@ -116,6 +122,15 @@ enum CsrStatus csr_write(u32 csr,
     switch (csr) {
         case CSR_MSTATUS:
             registers->mstatus = mstatus_write(registers->mstatus, value);
+            return CSR_OK;
+        case CSR_MTVAL:
+            registers->mtval = value;
+            return CSR_OK;
+        case CSR_MSCRATCH:
+            registers->mscratch = value;
+            return CSR_OK;
+        case CSR_MCAUSE:
+            registers->mcause = value;
             return CSR_OK;
         case CSR_MISA:
             // ignore the write

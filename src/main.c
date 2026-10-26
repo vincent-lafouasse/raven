@@ -11,6 +11,8 @@
 #include "loader.h"
 #include "log.h"
 
+#define TEMP_TOHOST  0x80001000
+
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \
     "       raven --elf program.elf"

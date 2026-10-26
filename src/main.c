@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,7 +12,7 @@
 #include "loader.h"
 #include "log.h"
 
-#define TEMP_TOHOST  0x80001000
+#define TEMP_TOHOST 0x80001000
 
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \
@@ -91,6 +92,14 @@ __attribute__((noreturn)) static void report_fatal_and_die(
                 hart->pc, trap.tval);
     }
     UNREACHABLE();
+}
+
+static void temp_log_tohost(struct Bus bus[static 1])
+{
+    u32 val;
+    assert(bus_read(bus, TEMP_TOHOST, 4, &val) == BUS_OK);
+
+    LOG(LOG_LEVEL_DEBUG, "tohost: 0x%x", val);
 }
 
 static const char* log_level_str(enum LogLevel level)
@@ -179,6 +188,8 @@ int main(int ac, char** av)
                     report_fatal_and_die(action, trap, &hart);
             }
         }
+
+        temp_log_tohost(bus);
     }
 
     free(bus);

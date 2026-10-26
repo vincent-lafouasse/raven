@@ -63,11 +63,13 @@ static struct Trap data_fault(enum BusStatus status,
 
     switch (access) {
         case ACCESS_LOAD:
-            return make_trap(
-                misaligned ? CAUSE_MISALIGNED_LOAD : CAUSE_LOAD_ACCESS, addr);
+            return trap_bus(
+                misaligned ? CAUSE_MISALIGNED_LOAD : CAUSE_LOAD_ACCESS, addr,
+                status);
         case ACCESS_STORE:
-            return make_trap(
-                misaligned ? CAUSE_MISALIGNED_STORE : CAUSE_STORE_ACCESS, addr);
+            return trap_bus(
+                misaligned ? CAUSE_MISALIGNED_STORE : CAUSE_STORE_ACCESS, addr,
+                status);
     }
     UNREACHABLE();
 }
@@ -133,13 +135,16 @@ static enum TrapStatus exec_csr(struct Hart hart[static 1],
     const bool writes = is_rw || !operand_is_zero_reg;
 
     // every refusal (nonexistent, read-only, privilege) is the same
-    // architectural outcome: illegal instruction, tval = the instruction
-    const struct Trap illegal = make_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
-
+    // architectural outcome: illegal instruction, tval = the instruction.
+    // The detail keeps which one it was.
     u32 old = 0;
-    if (reads && csr_read(instr.csr, &old, hart->mode, hart->csr) != CSR_OK) {
-        *trap_out = illegal;
-        return TRAP_RAISED;
+    if (reads) {
+        const enum CsrStatus status =
+            csr_read(instr.csr, &old, hart->mode, hart->csr);
+        if (status != CSR_OK) {
+            *trap_out = trap_csr(instr.raw, status, instr.csr, CSR_ACCESS_READ);
+            return TRAP_RAISED;
+        }
     }
 
     if (writes) {
@@ -154,8 +159,11 @@ static enum TrapStatus exec_csr(struct Hart hart[static 1],
 
         // reads have no side effects yet, so failing here after a
         // successful read still leaves the hart untouched
-        if (csr_write(instr.csr, new_value, hart->mode, &hart->csr) != CSR_OK) {
-            *trap_out = illegal;
+        const enum CsrStatus status =
+            csr_write(instr.csr, new_value, hart->mode, &hart->csr);
+        if (status != CSR_OK) {
+            *trap_out =
+                trap_csr(instr.raw, status, instr.csr, CSR_ACCESS_WRITE);
             return TRAP_RAISED;
         }
     }
@@ -339,7 +347,7 @@ enum TrapStatus execute(struct Hart hart[static 1],
             }
             break;
         default:
-            *trap_out = make_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
+            *trap_out = trap_unimplemented(instr.raw, instr.mnemonic);
             return TRAP_RAISED;
     }
 

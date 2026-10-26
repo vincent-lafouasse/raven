@@ -28,10 +28,11 @@ enum TrapStatus hart_fetch(struct Hart hart[static 1],
         case BUS_OK:
             break;
         case BUS_UNMAPPED:
-            *trap_out = make_trap(CAUSE_FETCH_ACCESS, hart->pc);
+            *trap_out = trap_bus(CAUSE_FETCH_ACCESS, hart->pc, BUS_UNMAPPED);
             return TRAP_RAISED;
         case BUS_MISALIGNED:
-            *trap_out = make_trap(CAUSE_MISALIGNED_FETCH, hart->pc);
+            *trap_out =
+                trap_bus(CAUSE_MISALIGNED_FETCH, hart->pc, BUS_MISALIGNED);
             return TRAP_RAISED;
     }
 
@@ -39,9 +40,7 @@ enum TrapStatus hart_fetch(struct Hart hart[static 1],
     const enum DecodeResult decode_status =
         decode_instruction(raw_instruction, &instruction);
     if (decode_status != DR_OK) {
-        // might store decode status for diagnostic but for now it's all just
-        // Illegal Instruction
-        *trap_out = make_trap(CAUSE_ILLEGAL_INSTRUCTION, raw_instruction);
+        *trap_out = trap_decode(raw_instruction, decode_status);
         return TRAP_RAISED;
     }
 

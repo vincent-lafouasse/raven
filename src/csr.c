@@ -391,6 +391,15 @@ const char* csr_name(u32 csr)
             return "dscratch0";
         case 0x7b3u:
             return "dscratch1";
+        // resumable non-maskable interrupts (Smrnmi)
+        case 0x740u:
+            return "mnscratch";
+        case 0x741u:
+            return "mnepc";
+        case 0x742u:
+            return "mncause";
+        case 0x744u:
+            return "mnstatus";
         default:
             break;
     }

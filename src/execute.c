@@ -113,6 +113,60 @@ static enum TrapStatus mem_store(struct Hart hart[static 1],
     return TRAP_NONE;
 }
 
+static enum TrapStatus exec_csr(struct Hart hart[static 1],
+                                struct Instruction instr,
+                                struct Trap trap_out[static 1])
+{
+    const bool immediate = instr.mnemonic == OP_CSRRWI ||
+                           instr.mnemonic == OP_CSRRSI ||
+                           instr.mnemonic == OP_CSRRCI;
+    const u32 operand = immediate ? (u32)instr.imm : hart->x[instr.rs1];
+    const bool operand_is_zero_reg =
+        immediate ? instr.imm == 0 : instr.rs1 == REG_ZERO;
+
+    const bool is_rw =
+        instr.mnemonic == OP_CSRRW || instr.mnemonic == OP_CSRRWI;
+    const bool is_rs =
+        instr.mnemonic == OP_CSRRS || instr.mnemonic == OP_CSRRSI;
+
+    const bool reads = !is_rw || instr.rd != REG_ZERO;
+    const bool writes = is_rw || !operand_is_zero_reg;
+
+    // every refusal (nonexistent, read-only, privilege) is the same
+    // architectural outcome: illegal instruction, tval = the instruction
+    const struct Trap illegal = make_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
+
+    u32 old = 0;
+    if (reads && csr_read(instr.csr, &old, hart->mode, hart->csr) != CSR_OK) {
+        *trap_out = illegal;
+        return TRAP_RAISED;
+    }
+
+    if (writes) {
+        u32 new_value;
+        if (is_rw) {
+            new_value = operand;
+        } else if (is_rs) {
+            new_value = old | operand;
+        } else {
+            new_value = old & ~operand;
+        }
+
+        // reads have no side effects yet, so failing here after a
+        // successful read still leaves the hart untouched
+        if (csr_write(instr.csr, new_value, hart->mode, &hart->csr) != CSR_OK) {
+            *trap_out = illegal;
+            return TRAP_RAISED;
+        }
+    }
+
+    // operand was captured above, so rd == rs1 is fine
+    if (reads) {
+        hart->x[instr.rd] = old;
+    }
+    return TRAP_NONE;
+}
+
 enum TrapStatus execute(struct Hart hart[static 1],
                         struct Bus bus[static 1],
                         struct Instruction instr,
@@ -274,6 +328,16 @@ enum TrapStatus execute(struct Hart hart[static 1],
         case OP_EBREAK:
             *trap_out = make_trap(CAUSE_BREAKPOINT, pc);
             return TRAP_RAISED;
+        case OP_CSRRW:
+        case OP_CSRRS:
+        case OP_CSRRC:
+        case OP_CSRRWI:
+        case OP_CSRRSI:
+        case OP_CSRRCI:
+            if (exec_csr(hart, instr, trap_out) == TRAP_RAISED) {
+                return TRAP_RAISED;
+            }
+            break;
         default:
             *trap_out = make_trap(CAUSE_ILLEGAL_INSTRUCTION, instr.raw);
             return TRAP_RAISED;

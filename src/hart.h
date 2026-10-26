@@ -49,6 +49,10 @@ struct Hart {
 
 void hart_reset(struct Hart hart[static 1], u32 entry);
 
+// hart_fetch and hart_execute take any trap they raise before returning: on
+// TRAP_RAISED the CSRs already record it and pc is at the handler (mtvec).
+// The caller just carries on with the next fetch. *trap_out is a copy for
+// observers (logs, the bench), with raven's non-architectural detail.
 enum TrapStatus hart_fetch(struct Hart hart[static 1],
                            struct Bus bus[static 1],
                            struct Instruction instr_out[static 1],

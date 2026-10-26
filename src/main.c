@@ -116,15 +116,15 @@ int main(int ac, char** av)
         struct Instruction instr;
 
         if (hart_fetch(&hart, bus, &instr, &trap) == TRAP_RAISED) {
-            die("trapped");
+            // already taken: nothing was fetched, pc is at the handler
+            continue;
         }
 
         format_instruction(instr, instruction_str);
         LOG(LOG_LEVEL_DEBUG, "%s", instruction_str);
 
-        if (hart_execute(&hart, bus, instr, &trap) == TRAP_RAISED) {
-            die("trapped");
-        }
+        // a trap here is already taken too, nothing to do
+        hart_execute(&hart, bus, instr, &trap);
 
         temp_log_tohost(bus);
     }

@@ -7,15 +7,18 @@
 #include "format_trap.h"
 #include "log.h"
 
-static void log_trap(const struct Hart hart[static 1], struct Trap trap)
+static void take_trap(struct Hart hart[static 1], struct Trap trap)
 {
-    if (!log_enabled(LOG_LEVEL_DEBUG)) {
-        return;
+    if (log_enabled(LOG_LEVEL_DEBUG)) {
+        char trap_str[TRAP_STR_LEN];
+        format_trap(trap, trap_str);
+        LOG(LOG_LEVEL_DEBUG, "trap at pc 0x%08x: %s -> mtvec 0x%08x", hart->pc,
+            trap_str, hart->csr.mtvec);
     }
 
-    char trap_str[TRAP_STR_LEN];
-    format_trap(trap, trap_str);
-    LOG(LOG_LEVEL_DEBUG, "trap at pc 0x%08x: %s", hart->pc, trap_str);
+    csr_take_trap(&hart->csr, trap.cause, trap.tval, hart->pc, hart->mode);
+    hart->mode = MODE_MACHINE;
+    hart->pc = hart->csr.mtvec;  // direct mode
 }
 
 void hart_reset(struct Hart hart[static 1], u32 entry)
@@ -68,7 +71,7 @@ enum TrapStatus hart_fetch(struct Hart hart[static 1],
 {
     const enum TrapStatus status = fetch(hart, bus, instr_out, trap_out);
     if (status == TRAP_RAISED) {
-        log_trap(hart, *trap_out);
+        take_trap(hart, *trap_out);
     }
     return status;
 }
@@ -80,7 +83,7 @@ enum TrapStatus hart_execute(struct Hart hart[static 1],
 {
     const enum TrapStatus status = execute(hart, bus, instr, trap_out);
     if (status == TRAP_RAISED) {
-        log_trap(hart, *trap_out);
+        take_trap(hart, *trap_out);
     }
     return status;
 }

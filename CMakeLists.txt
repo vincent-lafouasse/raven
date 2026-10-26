@@ -44,7 +44,6 @@ add_library(raven_core STATIC
     src/bus.c
     src/loader.c
     src/execute.c
-    src/env.c
     src/csr.c
     src/common/log.c
 )

@@ -7,7 +7,6 @@
 
 #include "bus.h"
 #include "debug.h"
-#include "env.h"
 #include "hart.h"
 #include "loader.h"
 #include "log.h"
@@ -47,51 +46,6 @@ static const char* load_status_str(enum LoadStatus s)
             return "unsupported format";
     }
     return "unknown error";
-}
-
-static const char* decode_result_str(enum DecodeResult r)
-{
-    switch (r) {
-        case DR_OK:
-            return "ok";
-        case DR_BAD_LENGTH:
-            return "not a 32-bit instruction";
-        case DR_BAD_OPCODE:
-            return "unknown opcode";
-        case DR_BAD_FUNCT3:
-            return "bad funct3";
-        case DR_BAD_FUNCT7:
-            return "bad funct7";
-        case DR_UNSUPPORTED:
-            return "valid but unsupported";
-    }
-    return "unknown decode error";
-}
-
-__attribute__((noreturn)) static void report_fatal_and_die(
-    struct TrapAction action,
-    struct Trap trap,
-    const struct Hart hart[static 1])
-{
-    switch (action.reason) {
-        case FATAL_UNKNOWN_SYSCALL:
-            die("unknown syscall a7=0x%08x at pc=0x%08x", action.value,
-                hart->pc);
-        case FATAL_BAD_EXIT_VALUE:
-            die("exit code %u does not fit in 8 bits (pc=0x%08x)", action.value,
-                hart->pc);
-        case FATAL_FAILED_DECODE: {
-            struct Instruction unused;
-            const enum DecodeResult r =
-                decode_instruction(action.value, &unused);
-            die("failed to decode 0x%08x at pc=0x%08x: %s", action.value,
-                hart->pc, decode_result_str(r));
-        }
-        case FATAL_TRAP:
-            die("%s at pc=0x%08x (tval=0x%08x)", trap_cause_str(trap.cause),
-                hart->pc, trap.tval);
-    }
-    UNREACHABLE();
 }
 
 static void temp_log_tohost(struct Bus bus[static 1])
@@ -162,31 +116,14 @@ int main(int ac, char** av)
         struct Instruction instr;
 
         if (hart_fetch(&hart, bus, &instr, &trap) == TRAP_RAISED) {
-            const struct TrapAction action = handle_trap(trap, &hart, bus);
-            switch (action.kind) {
-                case ACTION_CONTINUE:
-                    // no instruction was fetched, start the next tick
-                    continue;
-                case ACTION_EXIT:
-                    exit(action.exit_code);
-                case ACTION_FATAL:
-                    report_fatal_and_die(action, trap, &hart);
-            }
+            die("trapped");
         }
 
         format_instruction(instr, instruction_str);
         LOG(LOG_LEVEL_DEBUG, "%s", instruction_str);
 
         if (hart_execute(&hart, bus, instr, &trap) == TRAP_RAISED) {
-            const struct TrapAction action = handle_trap(trap, &hart, bus);
-            switch (action.kind) {
-                case ACTION_CONTINUE:
-                    break;
-                case ACTION_EXIT:
-                    exit(action.exit_code);
-                case ACTION_FATAL:
-                    report_fatal_and_die(action, trap, &hart);
-            }
+            die("trapped");
         }
 
         temp_log_tohost(bus);

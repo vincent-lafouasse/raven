@@ -53,7 +53,10 @@ static void temp_log_tohost(struct Bus bus[static 1])
     u32 val;
     assert(bus_read(bus, TEMP_TOHOST, 4, &val) == BUS_OK);
 
-    LOG(LOG_LEVEL_DEBUG, "tohost: 0x%x", val);
+    if (val != 0) {
+        LOG(LOG_LEVEL_DEBUG, "tohost: 0x%x", val);
+        exit(0);
+    }
 }
 
 static const char* log_level_str(enum LogLevel level)

@@ -9,6 +9,7 @@
 #include "env.h"
 #include "hart.h"
 #include "loader.h"
+#include "log.h"
 
 #define USAGE                           \
     "usage: raven --flat program.bin\n" \
@@ -90,8 +91,29 @@ __attribute__((noreturn)) static void report_fatal_and_die(
     UNREACHABLE();
 }
 
+static const char* log_level_str(enum LogLevel level)
+{
+    switch (level) {
+        case LOG_LEVEL_DEBUG:
+            return "debug";
+        case LOG_LEVEL_INFO:
+            return "info";
+        case LOG_LEVEL_WARN:
+            return "warn";
+    }
+    return "?";
+}
+
+static void stderr_sink(void* ctx, enum LogLevel level, const char* msg)
+{
+    fflush(stdout);
+    fprintf((FILE*)ctx, "[%s] %s\n", log_level_str(level), msg);
+}
+
 int main(int ac, char** av)
 {
+    log_set_sink(stderr_sink, stderr, LOG_LEVEL_DEBUG);
+
     if (ac != 3) {
         die(USAGE);
     }

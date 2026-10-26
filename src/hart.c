@@ -4,6 +4,19 @@
 
 #include "bus.h"
 #include "execute.h"
+#include "format_trap.h"
+#include "log.h"
+
+static void log_trap(const struct Hart hart[static 1], struct Trap trap)
+{
+    if (!log_enabled(LOG_LEVEL_DEBUG)) {
+        return;
+    }
+
+    char trap_str[TRAP_STR_LEN];
+    format_trap(trap, trap_str);
+    LOG(LOG_LEVEL_DEBUG, "trap at pc 0x%08x: %s", hart->pc, trap_str);
+}
 
 void hart_reset(struct Hart hart[static 1], u32 entry)
 {
@@ -18,10 +31,10 @@ void hart_reset(struct Hart hart[static 1], u32 entry)
     hart->csr = csr_new();
 }
 
-enum TrapStatus hart_fetch(struct Hart hart[static 1],
-                           struct Bus bus[static 1],
-                           struct Instruction instr_out[static 1],
-                           struct Trap trap_out[static 1])
+static enum TrapStatus fetch(struct Hart hart[static 1],
+                             struct Bus bus[static 1],
+                             struct Instruction instr_out[static 1],
+                             struct Trap trap_out[static 1])
 {
     u32 raw_instruction;
     switch (bus_read(bus, hart->pc, 4, &raw_instruction)) {
@@ -48,12 +61,28 @@ enum TrapStatus hart_fetch(struct Hart hart[static 1],
     return TRAP_NONE;
 }
 
+enum TrapStatus hart_fetch(struct Hart hart[static 1],
+                           struct Bus bus[static 1],
+                           struct Instruction instr_out[static 1],
+                           struct Trap trap_out[static 1])
+{
+    const enum TrapStatus status = fetch(hart, bus, instr_out, trap_out);
+    if (status == TRAP_RAISED) {
+        log_trap(hart, *trap_out);
+    }
+    return status;
+}
+
 enum TrapStatus hart_execute(struct Hart hart[static 1],
                              struct Bus bus[static 1],
                              struct Instruction instr,
                              struct Trap trap_out[static 1])
 {
-    return execute(hart, bus, instr, trap_out);
+    const enum TrapStatus status = execute(hart, bus, instr, trap_out);
+    if (status == TRAP_RAISED) {
+        log_trap(hart, *trap_out);
+    }
+    return status;
 }
 
 void hart_dump(const struct Hart hart[static 1], char out[static HART_DUMP_LEN])

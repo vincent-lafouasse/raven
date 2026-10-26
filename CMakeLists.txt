@@ -39,6 +39,7 @@ target_link_options(raven_flags INTERFACE
 add_library(raven_core STATIC
     src/instruction.c
     src/format_instruction.c
+    src/format_trap.c
     src/hart.c
     src/bus.c
     src/loader.c

@@ -417,8 +417,12 @@ static enum DecodeResult decode_system(u32 word,
                     *out = (struct Instruction){.raw = word,
                                                 .mnemonic = OP_EBREAK};
                     return DR_OK;
+                case 0x30200073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_MRET};
+                    return DR_OK;
                 default:
-                    // MRET, WFI, SFENCE.VMA, ... are legal RISC-V, just
+                    // SRET, WFI, SFENCE.VMA, ... are legal RISC-V, just
                     // not implemented yet
                     return DR_UNSUPPORTED;
             }

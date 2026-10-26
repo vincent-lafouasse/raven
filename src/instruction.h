@@ -54,6 +54,9 @@ enum Mnemonic {
     OP_ECALL,
     OP_EBREAK,
 
+    // privileged
+    OP_MRET,
+
     // Zicsr
     OP_CSRRW,
     OP_CSRRS,

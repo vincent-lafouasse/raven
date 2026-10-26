@@ -74,6 +74,9 @@ static const struct {
     [OP_ECALL] = {"ecall", OPF_NONE},
     [OP_EBREAK] = {"ebreak", OPF_NONE},
 
+    // privileged
+    [OP_MRET] = {"mret", OPF_NONE},
+
     // Zicsr
     [OP_CSRRW] = {"csrrw", OPF_CSR_REG},
     [OP_CSRRS] = {"csrrs", OPF_CSR_REG},

@@ -164,7 +164,7 @@ int main(int ac, char** av)
         }
 
         format_instruction(instr, instruction_str);
-        printf("%s\n", instruction_str);
+        LOG(LOG_LEVEL_DEBUG, "%s", instruction_str);
 
         if (hart_execute(&hart, bus, instr, &trap) == TRAP_RAISED) {
             const struct TrapAction action = handle_trap(trap, &hart, bus);

@@ -48,15 +48,36 @@ static const char* load_status_str(enum LoadStatus s)
     return "unknown error";
 }
 
+// riscv-tests' env/p reports its result by writing tohost once, then spins.
+// The low word is enough: on RV32 the env writes it first, and the high word
+// is always 0.
+//   0             not finished yet
+//   1             pass
+//   odd, not 1    fail: test case (value >> 1) failed. An unexpected trap
+//                 ORs in 1337, so the number is garbled; see the trap log
+//   even          another HTIF command, which env/p never sends
 static void temp_log_tohost(struct Bus bus[static 1])
 {
     u32 val;
-    assert(bus_read(bus, TEMP_TOHOST, 4, &val) == BUS_OK);
+    const enum BusStatus status = bus_read(bus, TEMP_TOHOST, 4, &val);
+    assert(status == BUS_OK);
+    (void)status;  // unused when NDEBUG
 
-    if (val != 0) {
-        LOG(LOG_LEVEL_DEBUG, "tohost: 0x%x", val);
-        exit(0);
+    if (val == 0) {
+        return;
     }
+
+    if (val == 1) {
+        LOG(LOG_LEVEL_INFO, "tohost 0x%x: pass", val);
+        exit(EXIT_SUCCESS);
+    }
+
+    if (val & 1u) {
+        LOG(LOG_LEVEL_WARN, "tohost 0x%x: fail, test case %u", val, val >> 1);
+    } else {
+        LOG(LOG_LEVEL_WARN, "tohost 0x%x: unsupported HTIF command", val);
+    }
+    exit(EXIT_FAILURE);
 }
 
 static const char* log_level_str(enum LogLevel level)

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "privilege.h"
-#include "trap.h"
+#include "trap_cause.h"
 #include "types.h"
 
 struct Mstatus {
@@ -26,7 +26,8 @@ enum CsrStatus {
 struct Csr csr_new(void);
 
 void csr_take_trap(struct Csr csr[static 1],
-                   struct Trap trap,
+                   enum TrapCause cause,
+                   u32 tval,
                    u32 pc,
                    enum PrivilegeMode mode);
 

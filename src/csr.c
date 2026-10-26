@@ -67,13 +67,14 @@ struct Csr csr_new(void)
 }
 
 void csr_take_trap(struct Csr csr[static 1],
-                   struct Trap trap,
+                   enum TrapCause cause,
+                   u32 tval,
                    u32 pc,
                    enum PrivilegeMode mode)
 {
     csr->mepc = pc;
-    csr->mcause = (u32)trap.cause;
-    csr->mtval = trap.tval;
+    csr->mcause = (u32)cause;
+    csr->mtval = tval;
 
     // a one-deep stack: push the interrupt enable and the mode, then disable
     // interrupts so the handler can save state before anything else traps

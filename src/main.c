@@ -144,10 +144,6 @@ int main(int ac, char** av)
     struct Hart hart;
     hart_reset(&hart, entry);
 
-    char hart_str[HART_DUMP_LEN] = {0};
-    hart_dump(&hart, hart_str);
-    printf("%s\n", hart_str);
-
     char instruction_str[INSTRUCTION_STR_LEN] = {0};
 
     while (1) {
@@ -181,9 +177,6 @@ int main(int ac, char** av)
                     report_fatal_and_die(action, trap, &hart);
             }
         }
-
-        hart_dump(&hart, hart_str);
-        printf("%s\n", hart_str);
     }
 
     free(bus);

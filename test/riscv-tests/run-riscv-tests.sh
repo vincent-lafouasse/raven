@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
-# Builds and runs the vendored rv32ui riscv-tests on raven.
+# Builds and runs one suite of the vendored riscv-tests on raven.
 #
-#   test/riscv-tests/run-riscv-tests.sh            run every test
-#   test/riscv-tests/run-riscv-tests.sh add lw     run only these
+#   test/riscv-tests/run-riscv-tests.sh                   all of rv32ui
+#   test/riscv-tests/run-riscv-tests.sh add lw            only these
+#   SUITE=rv32mi test/riscv-tests/run-riscv-tests.sh      all of rv32mi
 #
 # Each test is built against the upstream env/p and run on run_riscv_test, a
 # bench around raven_core that watches tohost and exits with:
@@ -12,20 +13,35 @@
 #                          unexpected trap garbled it): see the log
 #   anything else          the bench itself failed (load error, ...)
 #
-# Each test's output goes to build/riscv-tests/<name>.log.
-# Override the bench with RAVEN=path, the time limit with TIMEOUT=seconds.
+# Each test's output goes to build/riscv-tests/<suite>/<name>.log.
+# Choose the suite with SUITE=rv32ui|rv32mi (default rv32ui), the bench with
+# RAVEN=path, the time limit with TIMEOUT=seconds.
 
 set -uo pipefail
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
 raven=${RAVEN:-$root/build/debug/bin/run_riscv_test}
 timeout_s=${TIMEOUT:-10}
-src_dir=$root/third_party/riscv-tests/isa/rv32ui
-out_dir=$root/build/riscv-tests
+suite=${SUITE:-rv32ui}
+src_dir=$root/third_party/riscv-tests/isa/$suite
+out_dir=$root/build/riscv-tests/$suite
 
-# fence_i needs Zifencei (self-modifying code), ma_data tests misaligned
-# accesses, which raven rejects by design
-skip=(fence_i ma_data)
+# tests that need something raven leaves out on purpose
+case "$suite" in
+    rv32ui)
+        # fence_i needs Zifencei (self-modifying code), ma_data tests
+        # misaligned accesses, which raven rejects by design
+        skip=(fence_i ma_data)
+        ;;
+    rv32mi)
+        # pmpaddr needs physical memory protection, out of scope
+        skip=(pmpaddr)
+        ;;
+    *)
+        echo "unknown suite $suite (expected rv32ui or rv32mi)" >&2
+        exit 1
+        ;;
+esac
 
 if [ ! -x "$raven" ]; then
     echo "test bench not found at $raven, build it first (make)" >&2

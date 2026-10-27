@@ -73,7 +73,10 @@ enable_testing()
 add_test(NAME decoder
     COMMAND sh test.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/decoder-test)
-add_test(NAME riscv-tests
-    COMMAND ${CMAKE_COMMAND} -E env RAVEN=$<TARGET_FILE:run_riscv_test> NO_COLOR=1
-            ${CMAKE_SOURCE_DIR}/test/riscv-tests/run-riscv-tests.sh
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+foreach(suite rv32ui rv32mi)
+    add_test(NAME riscv-tests-${suite}
+        COMMAND ${CMAKE_COMMAND} -E env
+                RAVEN=$<TARGET_FILE:run_riscv_test> SUITE=${suite} NO_COLOR=1
+                ${CMAKE_SOURCE_DIR}/test/riscv-tests/run-riscv-tests.sh
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endforeach()

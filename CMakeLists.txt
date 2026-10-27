@@ -61,8 +61,12 @@ target_link_libraries(raven_core PRIVATE bitcast::bitcast)
 add_executable(raven     src/main.c)
 add_executable(raven-dis tools/disassemble.c)
 
-target_link_libraries(raven     PRIVATE raven_core)
-target_link_libraries(raven-dis PRIVATE raven_core bitcast::bitcast)
+# test bench for riscv-tests: raven_core plus a tohost monitor
+add_executable(run_riscv_test test/riscv-tests/run_riscv_test.c)
+
+target_link_libraries(raven          PRIVATE raven_core)
+target_link_libraries(raven-dis      PRIVATE raven_core bitcast::bitcast)
+target_link_libraries(run_riscv_test PRIVATE raven_core)
 
 # both tests need a RISC-V cross toolchain (riscv64-unknown-elf-*)
 enable_testing()
@@ -70,6 +74,6 @@ add_test(NAME decoder
     COMMAND sh test.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/decoder-test)
 add_test(NAME riscv-tests
-    COMMAND ${CMAKE_COMMAND} -E env RAVEN=$<TARGET_FILE:raven> NO_COLOR=1
+    COMMAND ${CMAKE_COMMAND} -E env RAVEN=$<TARGET_FILE:run_riscv_test> NO_COLOR=1
             ${CMAKE_SOURCE_DIR}/test/riscv-tests/run-riscv-tests.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

@@ -4,19 +4,21 @@
 #   test/riscv-tests/run-riscv-tests.sh            run every test
 #   test/riscv-tests/run-riscv-tests.sh add lw     run only these
 #
-# A test exits through `ecall` with a7 = 93, and raven exits with a0:
+# Each test is built against the upstream env/p and run on run_riscv_test, a
+# bench around raven_core that watches tohost and exits with:
 #   0                      pass
-#   odd, >= 3              test case (code >> 1) failed
-#   anything else          raven itself failed (decode error, fault, ...)
-# raven's own errors use exit code 1, which a test can never produce.
+#   3..127, odd            test case (code >> 1) failed
+#   255                    failed, test case unknown (number too large, or an
+#                          unexpected trap garbled it): see the log
+#   anything else          the bench itself failed (load error, ...)
 #
-# Each test's raven output goes to build/riscv-tests/<name>.log.
-# Override the emulator with RAVEN=path, the time limit with TIMEOUT=seconds.
+# Each test's output goes to build/riscv-tests/<name>.log.
+# Override the bench with RAVEN=path, the time limit with TIMEOUT=seconds.
 
 set -uo pipefail
 
 root=$(cd "$(dirname "$0")/../.." && pwd)
-raven=${RAVEN:-$root/build/debug/bin/raven}
+raven=${RAVEN:-$root/build/debug/bin/run_riscv_test}
 timeout_s=${TIMEOUT:-10}
 src_dir=$root/third_party/riscv-tests/isa/rv32ui
 out_dir=$root/build/riscv-tests
@@ -26,7 +28,7 @@ out_dir=$root/build/riscv-tests
 skip=(fence_i ma_data)
 
 if [ ! -x "$raven" ]; then
-    echo "raven not found at $raven, build it first (make)" >&2
+    echo "test bench not found at $raven, build it first (make)" >&2
     exit 1
 fi
 
@@ -106,11 +108,14 @@ for name in "${names[@]}"; do
     elif [ $code -ge 3 ] && [ $code -lt 128 ] && [ $((code % 2)) -eq 1 ]; then
         report FAIL "$name" "test case $((code >> 1)), see $rel_log"
         fail=$((fail + 1))
+    elif [ $code -eq 255 ]; then
+        report FAIL "$name" "test case unknown, see $rel_log"
+        fail=$((fail + 1))
     elif [ $code -eq 137 ]; then
         report ERROR "$name" "killed after ${timeout_s}s, see $rel_log"
         error=$((error + 1))
     else
-        report ERROR "$name" "raven exited $code, see $rel_log"
+        report ERROR "$name" "bench exited $code, see $rel_log"
         error=$((error + 1))
     fi
 done

@@ -3,6 +3,7 @@
 #include "bus.h"
 #include "csr.h"
 #include "instruction.h"
+#include "privilege.h"
 #include "trap_cause.h"
 #include "types.h"
 
@@ -21,6 +22,7 @@ enum TrapDetailKind {
     DETAIL_CSR,            // illegal instruction: a CSR access was refused
     DETAIL_UNIMPLEMENTED,  // illegal instruction: decoded but not executable
     DETAIL_BUS,            // fetch, load or store fault: what the bus reported
+    DETAIL_PRIVILEGED,     // illegal instruction: needs a more privileged mode
 };
 
 enum CsrAccess {
@@ -39,6 +41,10 @@ struct TrapDetail {
         } csr;                   // DETAIL_CSR
         enum Mnemonic mnemonic;  // DETAIL_UNIMPLEMENTED
         enum BusStatus bus;      // DETAIL_BUS
+        struct {
+            enum PrivilegeMode required;  // least privileged mode allowed
+            enum PrivilegeMode current;   // mode the hart was in
+        } privilege;                      // DETAIL_PRIVILEGED
     } as;
 };
 
@@ -92,5 +98,19 @@ static inline struct Trap trap_bus(enum TrapCause cause,
     struct Trap t = make_trap(cause, addr);
     t.detail.kind = DETAIL_BUS;
     t.detail.as.bus = status;
+    return t;
+}
+
+// An instruction that exists and is implemented, but not available in the
+// current mode (mret below M, later sret below S, ...). CSR accesses have
+// their own detail, see trap_csr.
+static inline struct Trap trap_privileged(u32 raw,
+                                          enum PrivilegeMode required,
+                                          enum PrivilegeMode current)
+{
+    struct Trap t = make_trap(CAUSE_ILLEGAL_INSTRUCTION, raw);
+    t.detail.kind = DETAIL_PRIVILEGED;
+    t.detail.as.privilege.required = required;
+    t.detail.as.privilege.current = current;
     return t;
 }

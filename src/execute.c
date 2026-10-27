@@ -346,6 +346,18 @@ enum TrapStatus execute(struct Hart hart[static 1],
                 return TRAP_RAISED;
             }
             break;
+        case OP_MRET:
+            if (hart->mode != MODE_MACHINE) {
+                *trap_out =
+                    trap_privileged(instr.raw, MODE_MACHINE, hart->mode);
+                return TRAP_RAISED;
+            }
+            next_pc = hart->csr.mepc;
+            hart->mode = hart->csr.mstatus.mpp;
+            hart->csr.mstatus.mpp = MODE_MACHINE;
+            hart->csr.mstatus.mie = hart->csr.mstatus.mpie;
+            hart->csr.mstatus.mpie = true;
+            break;
         default:
             *trap_out = trap_unimplemented(instr.raw, instr.mnemonic);
             return TRAP_RAISED;

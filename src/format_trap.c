@@ -50,6 +50,19 @@ static const char* bus_status_str(enum BusStatus s)
     return "unknown bus status";
 }
 
+static const char* mode_str(enum PrivilegeMode m)
+{
+    switch (m) {
+        case MODE_USER:
+            return "U";
+        case MODE_SUPERVISOR:
+            return "S";
+        case MODE_MACHINE:
+            return "M";
+    }
+    return "?";
+}
+
 // appends to out, never past TRAP_STR_LEN; *n stays a valid length
 __attribute__((format(printf, 3, 4))) static void
 append(char out[static TRAP_STR_LEN], size_t n[static 1], const char* fmt, ...)
@@ -114,6 +127,12 @@ void format_trap(struct Trap trap, char out[static TRAP_STR_LEN])
             break;
         case DETAIL_BUS:
             append(out, &n, ": %s", bus_status_str(d.as.bus));
+            break;
+        case DETAIL_PRIVILEGED:
+            append(out, &n, ": `%s` requires %s-mode, hart is in %s-mode",
+                   has_instr ? instr_str : "?",
+                   mode_str(d.as.privilege.required),
+                   mode_str(d.as.privilege.current));
             break;
     }
 }

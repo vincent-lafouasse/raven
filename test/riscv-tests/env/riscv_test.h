@@ -24,7 +24,7 @@
 #define RVTEST_CODE_BEGIN \
     .text;                \
     .globl _start;        \
-_start:
+    _start:
 
 // never reached: every test ends in RVTEST_PASS or RVTEST_FAIL
 #define RVTEST_CODE_END
@@ -37,12 +37,12 @@ _start:
     ecall
 
 // TESTNUM is never 0 here, test_macros.h sets it before every case
-#define RVTEST_FAIL              \
-    fence;                       \
-    sll TESTNUM, TESTNUM, 1;     \
-    or TESTNUM, TESTNUM, 1;      \
-    li a7, 93;                   \
-    addi a0, TESTNUM, 0;         \
+#define RVTEST_FAIL          \
+    fence;                   \
+    sll TESTNUM, TESTNUM, 1; \
+    or TESTNUM, TESTNUM, 1;  \
+    li a7, 93;               \
+    addi a0, TESTNUM, 0;     \
     ecall
 
 // input data for the load/store tests

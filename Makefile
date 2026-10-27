@@ -60,6 +60,7 @@ run: debug
 format:
 	clang-format -i $(shell find src -name '*.c' -or -name '*.h')
 	clang-format -i $(shell find tools -name '*.c' -or -name '*.h')
+	clang-format -i $(shell find test -name '*.c' -or -name '*.h')
 
 clean:
 	@for d in $(DEBUG_DIR) $(RELEASE_DIR); do \

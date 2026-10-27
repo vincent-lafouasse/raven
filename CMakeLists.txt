@@ -71,5 +71,5 @@ add_test(NAME decoder
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test/decoder-test)
 add_test(NAME riscv-tests
     COMMAND ${CMAKE_COMMAND} -E env RAVEN=$<TARGET_FILE:raven> NO_COLOR=1
-            ${CMAKE_SOURCE_DIR}/test/run-riscv-tests.sh
+            ${CMAKE_SOURCE_DIR}/test/riscv-tests/run-riscv-tests.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

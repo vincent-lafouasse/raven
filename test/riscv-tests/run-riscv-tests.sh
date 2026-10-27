@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Builds and runs the vendored rv32ui riscv-tests on raven.
 #
-#   test/run-riscv-tests.sh            run every test
-#   test/run-riscv-tests.sh add lw     run only these
+#   test/riscv-tests/run-riscv-tests.sh            run every test
+#   test/riscv-tests/run-riscv-tests.sh add lw     run only these
 #
 # A test exits through `ecall` with a7 = 93, and raven exits with a0:
 #   0                      pass
@@ -15,7 +15,7 @@
 
 set -uo pipefail
 
-root=$(cd "$(dirname "$0")/.." && pwd)
+root=$(cd "$(dirname "$0")/../.." && pwd)
 raven=${RAVEN:-$root/build/debug/bin/raven}
 timeout_s=${TIMEOUT:-10}
 src_dir=$root/third_party/riscv-tests/isa/rv32ui
@@ -90,7 +90,7 @@ for name in "${names[@]}"; do
     log=$out_dir/$name.log
     rel_log=${log#"$root"/}
 
-    if ! "$root/test/compile.sh" --flat "$src_dir/$name.S" "$bin" \
+    if ! "$root/test/riscv-tests/compile.sh" --flat "$src_dir/$name.S" "$bin" \
         >"$log" 2>&1; then
         report ERROR "$name" "build failed, see $rel_log"
         error=$((error + 1))

@@ -86,4 +86,4 @@ Once traps are architectural, `ecall` jumps to the guest's handler at
 
 - The `rv32mi` riscv-tests pass under the **upstream** `env/p` environment,
   unmodified (skipping tests that need PMP or debug triggers).
-- `test/env/riscv_test.h` is no longer needed for `rv32ui` either.
+- `test/riscv-tests/env/riscv_test.h` is no longer needed for `rv32ui` either.

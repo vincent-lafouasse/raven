@@ -1,8 +1,8 @@
 #!/bin/sh
 # Builds one riscv-tests source (or any RV32 .S) for raven.
 #
-#   test/compile.sh [--env upstream|raven] --elf  path/to/test.S [out.elf]
-#   test/compile.sh [--env upstream|raven] --flat path/to/test.S [out.bin]
+#   test/riscv-tests/compile.sh [--env upstream|raven] --elf  path/to/test.S [out.elf]
+#   test/riscv-tests/compile.sh [--env upstream|raven] --flat path/to/test.S [out.bin]
 #
 # Output defaults to build/riscv-tests/<env>/<name>.elf or .bin at the repo
 # root. A flat binary is the linked ELF flattened with objcopy, so _start ends
@@ -12,7 +12,7 @@
 #   upstream  third_party/riscv-tests/env/p (default), the real riscv-tests
 #             "p" env. Needs Zicsr, trap delivery and mret; the result is
 #             written to tohost, which its link.ld places at 0x80001000.
-#   raven     test/env/riscv_test.h. Ad-hoc scaffolding: no CSRs, no traps,
+#   raven     test/riscv-tests/env/riscv_test.h. Ad-hoc scaffolding: no CSRs, no traps,
 #             PASS/FAIL are an ecall that raven handles itself.
 #
 # Override the toolchain prefix with CROSS, e.g. CROSS=riscv32-unknown-elf-
@@ -41,13 +41,13 @@ esac
 src=$2
 [ -f "$src" ] || { echo "$0: no such file: $src" >&2; exit 1; }
 
-root=$(cd "$(dirname "$0")/.." && pwd)
+root=$(cd "$(dirname "$0")/../.." && pwd)
 cross=${CROSS:-riscv64-unknown-elf-}
 
 case "$env" in
     raven)
         march=rv32i
-        env_dir=$root/test/env
+        env_dir=$root/test/riscv-tests/env
         link="-Ttext=0x80000000"
         ;;
     upstream)

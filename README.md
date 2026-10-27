@@ -66,9 +66,9 @@ runs both through ctest.
   and compares the binaries.
 - `third_party/riscv-tests`: the `rv32ui` tests, vendored from
   riscv-software-src/riscv-tests. They build against raven's own environment
-  in `test/env/riscv_test.h` instead of upstream's boot code.
-  - `test/compile.sh --flat|--elf test.S` builds one test.
-  - `test/run-riscv-tests.sh [name...]` builds and runs them, reporting PASS,
+  in `test/riscv-tests/env/riscv_test.h` instead of upstream's boot code.
+  - `test/riscv-tests/compile.sh --flat|--elf test.S` builds one test.
+  - `test/riscv-tests/run-riscv-tests.sh [name...]` builds and runs them, reporting PASS,
     FAIL (a check in the test failed) or ERROR (build or raven failed).
 
 ### rv32ui status

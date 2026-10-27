@@ -406,8 +406,19 @@ static enum DecodeResult decode_system(u32 word,
 
     switch (data.funct3) {
         case 0:
-            // privileged instructions, each identified by its whole word
-            // since they have no operands
+            // SFENCE.VMA is the one operand-carrying instruction here
+            if (u32_get_bits(word, 25, 31) == 0x09 && data.rd == 0) {
+                *out = (struct Instruction){
+                    .raw = word,
+                    .mnemonic = OP_SFENCE_VMA,
+                    .rs1 = data.rs1,
+                    .rs2 = (u8)u32_get_bits(word, 20, 24),
+                };
+                return DR_OK;
+            }
+
+            // the others have no operands: each is identified by its whole
+            // word
             switch (word) {
                 case 0x00000073:
                     *out =
@@ -421,9 +432,25 @@ static enum DecodeResult decode_system(u32 word,
                     *out =
                         (struct Instruction){.raw = word, .mnemonic = OP_MRET};
                     return DR_OK;
+                case 0x10200073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_SRET};
+                    return DR_OK;
+                case 0x70200073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_MNRET};
+                    return DR_OK;
+                case 0x7b200073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_DRET};
+                    return DR_OK;
+                case 0x10500073:
+                    *out =
+                        (struct Instruction){.raw = word, .mnemonic = OP_WFI};
+                    return DR_OK;
                 default:
-                    // SRET, WFI, SFENCE.VMA, ... are legal RISC-V, just
-                    // not implemented yet
+                    // hypervisor fences, SINVAL.VMA, ... are legal RISC-V,
+                    // just not decoded
                     return DR_UNSUPPORTED;
             }
         case 1:
@@ -483,7 +510,14 @@ static enum DecodeResult decode_misc_mem(u32 word,
             };
             return DR_OK;
         case 1:  // FENCE.I (Zifencei)
-            return DR_UNSUPPORTED;
+            *out = (struct Instruction){
+                .raw = word,
+                .mnemonic = OP_FENCE_I,
+                .rd = data.rd,
+                .rs1 = data.rs1,
+                .imm = data.imm,
+            };
+            return DR_OK;
         default:
             return DR_BAD_FUNCT3;
     }

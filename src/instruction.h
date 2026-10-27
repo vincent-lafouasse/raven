@@ -56,6 +56,11 @@ enum Mnemonic {
 
     // privileged
     OP_MRET,
+    OP_SRET,
+    OP_MNRET,
+    OP_DRET,
+    OP_WFI,
+    OP_SFENCE_VMA,
 
     // Zicsr
     OP_CSRRW,
@@ -69,6 +74,9 @@ enum Mnemonic {
     // imm holds the raw, zero-extended bits 31:20: fm (11:8), pred (7:4),
     // succ (3:0), each set ordered i, o, r, w from msb to lsb
     OP_FENCE,
+
+    // Zifencei. rd, rs1 and imm are reserved and ignored
+    OP_FENCE_I,
 };
 
 struct Instruction {

@@ -17,6 +17,8 @@ enum OperandForm {
     OPF_FENCE,
     OPF_CSR_REG,
     OPF_CSR_IMM,
+    OPF_SFENCE_VMA,
+    OPF_FENCE_I,
 };
 
 static const struct {
@@ -76,6 +78,11 @@ static const struct {
 
     // privileged
     [OP_MRET] = {"mret", OPF_NONE},
+    [OP_SRET] = {"sret", OPF_NONE},
+    [OP_MNRET] = {"mnret", OPF_NONE},
+    [OP_DRET] = {"dret", OPF_NONE},
+    [OP_WFI] = {"wfi", OPF_NONE},
+    [OP_SFENCE_VMA] = {"sfence.vma", OPF_SFENCE_VMA},
 
     // Zicsr
     [OP_CSRRW] = {"csrrw", OPF_CSR_REG},
@@ -87,6 +94,7 @@ static const struct {
 
     // memory ordering
     [OP_FENCE] = {"fence", OPF_FENCE},
+    [OP_FENCE_I] = {"fence.i", OPF_FENCE_I},
 };
 
 static const char* const k_abi_names[32] = {
@@ -218,5 +226,18 @@ void format_instruction(struct Instruction instr,
                      reg_name(instr.rd), csr, instr.imm);
             break;
         }
+        case OPF_SFENCE_VMA:
+            snprintf(out, INSTRUCTION_STR_LEN, "%s %s, %s", name,
+                     reg_name(instr.rs1), reg_name(instr.rs2));
+            break;
+        case OPF_FENCE_I:
+            // the reserved fields have no assembly syntax: only the
+            // canonical encoding prints as fence.i, see format_fence
+            if (instr.raw == 0x0000100fu) {
+                snprintf(out, INSTRUCTION_STR_LEN, "%s", name);
+            } else {
+                snprintf(out, INSTRUCTION_STR_LEN, ".word 0x%08x", instr.raw);
+            }
+            break;
     }
 }

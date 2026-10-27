@@ -1,6 +1,7 @@
 #include "instruction.h"
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "csr.h"
@@ -168,9 +169,182 @@ static void format_csr(u16 csr, char out[static CSR_STR_LEN])
     }
 }
 
+// The standard single-instruction pseudo-instructions (unprivileged spec,
+// "RISC-V Assembly Programmer's Handbook", and the CSR ones from Zicsr).
+// Writes one and returns true if instr is an instance of one, else returns
+// false and leaves out alone. Never looks at other instructions.
+// x1, the return address register: the pseudo-instructions special-case it
+#define X_RA 1
+
+static bool format_pseudo(struct Instruction instr,
+                          char out[static INSTRUCTION_STR_LEN])
+{
+    const u8 rd = instr.rd;
+    const u8 rs1 = instr.rs1;
+    const u8 rs2 = instr.rs2;
+    const i32 imm = instr.imm;
+    const char* const d = reg_name(rd);
+    const char* const s1 = reg_name(rs1);
+    const char* const s2 = reg_name(rs2);
+    const size_t n = INSTRUCTION_STR_LEN;
+
+    switch (instr.mnemonic) {
+        case OP_ADDI:
+            if (rd == 0 && rs1 == 0 && imm == 0) {
+                snprintf(out, n, "nop");
+            } else if (rs1 == 0) {
+                snprintf(out, n, "li %s, %d", d, imm);
+            } else if (imm == 0) {
+                snprintf(out, n, "mv %s, %s", d, s1);
+            } else {
+                return false;
+            }
+            return true;
+        case OP_XORI:
+            if (imm != -1) {
+                return false;
+            }
+            snprintf(out, n, "not %s, %s", d, s1);
+            return true;
+        case OP_SUB:
+            if (rs1 != 0) {
+                return false;
+            }
+            snprintf(out, n, "neg %s, %s", d, s2);
+            return true;
+        case OP_SLTIU:
+            if (imm != 1) {
+                return false;
+            }
+            snprintf(out, n, "seqz %s, %s", d, s1);
+            return true;
+        case OP_SLTU:
+            if (rs1 != 0) {
+                return false;
+            }
+            snprintf(out, n, "snez %s, %s", d, s2);
+            return true;
+        case OP_SLT:
+            if (rs2 == 0) {
+                snprintf(out, n, "sltz %s, %s", d, s1);
+            } else if (rs1 == 0) {
+                snprintf(out, n, "sgtz %s, %s", d, s2);
+            } else {
+                return false;
+            }
+            return true;
+
+        // branches against zero
+        case OP_BEQ:
+            if (rs2 != 0) {
+                return false;
+            }
+            snprintf(out, n, "beqz %s, .%+d", s1, imm);
+            return true;
+        case OP_BNE:
+            if (rs2 != 0) {
+                return false;
+            }
+            snprintf(out, n, "bnez %s, .%+d", s1, imm);
+            return true;
+        case OP_BLT:
+            if (rs2 == 0) {
+                snprintf(out, n, "bltz %s, .%+d", s1, imm);
+            } else if (rs1 == 0) {
+                snprintf(out, n, "bgtz %s, .%+d", s2, imm);
+            } else {
+                return false;
+            }
+            return true;
+        case OP_BGE:
+            if (rs2 == 0) {
+                snprintf(out, n, "bgez %s, .%+d", s1, imm);
+            } else if (rs1 == 0) {
+                snprintf(out, n, "blez %s, .%+d", s2, imm);
+            } else {
+                return false;
+            }
+            return true;
+
+        // jumps
+        case OP_JAL:
+            if (rd == 0) {
+                snprintf(out, n, "j .%+d", imm);
+            } else if (rd == X_RA) {
+                snprintf(out, n, "jal .%+d", imm);
+            } else {
+                return false;
+            }
+            return true;
+        case OP_JALR:
+            if (imm != 0) {
+                return false;
+            }
+            if (rd == 0 && rs1 == X_RA) {
+                snprintf(out, n, "ret");
+            } else if (rd == 0) {
+                snprintf(out, n, "jr %s", s1);
+            } else if (rd == X_RA) {
+                snprintf(out, n, "jalr %s", s1);
+            } else {
+                return false;
+            }
+            return true;
+
+        // CSR accesses that only read or only write
+        case OP_CSRRS:
+        case OP_CSRRC:
+        case OP_CSRRW:
+        case OP_CSRRSI:
+        case OP_CSRRCI:
+        case OP_CSRRWI: {
+            char csr[CSR_STR_LEN];
+            format_csr(instr.csr, csr);
+
+            if (instr.mnemonic == OP_CSRRS && rs1 == 0) {
+                snprintf(out, n, "csrr %s, %s", d, csr);
+                return true;
+            }
+            if (rd != 0) {
+                return false;  // both reads and writes: keep the full form
+            }
+            switch (instr.mnemonic) {
+                case OP_CSRRW:
+                    snprintf(out, n, "csrw %s, %s", csr, s1);
+                    return true;
+                case OP_CSRRS:
+                    snprintf(out, n, "csrs %s, %s", csr, s1);
+                    return true;
+                case OP_CSRRC:
+                    snprintf(out, n, "csrc %s, %s", csr, s1);
+                    return true;
+                case OP_CSRRWI:
+                    snprintf(out, n, "csrwi %s, %d", csr, imm);
+                    return true;
+                case OP_CSRRSI:
+                    snprintf(out, n, "csrsi %s, %d", csr, imm);
+                    return true;
+                case OP_CSRRCI:
+                    snprintf(out, n, "csrci %s, %d", csr, imm);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        default:
+            return false;
+    }
+}
+
 void format_instruction(struct Instruction instr,
+                        enum FormatStyle style,
                         char out[static INSTRUCTION_STR_LEN])
 {
+    if (style == FORMAT_PSEUDO && format_pseudo(instr, out)) {
+        return;
+    }
+
     const char* name = k_info[instr.mnemonic].name;
     const enum OperandForm form = k_info[instr.mnemonic].form;
 

@@ -146,7 +146,7 @@ int main(int ac, char** av)
 
         // pc still points at the fetched instruction until it executes
         if (log_enabled(LOG_LEVEL_DEBUG)) {
-            format_instruction(instr, instruction_str);
+            format_instruction(instr, FORMAT_PSEUDO, instruction_str);
             LOG(LOG_LEVEL_DEBUG, "0x%08x: %s", hart.pc, instruction_str);
         }
 

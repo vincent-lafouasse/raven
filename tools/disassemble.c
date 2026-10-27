@@ -63,7 +63,9 @@ int main(int ac, char** av)
 
         struct Instruction instr;
         if (decode_instruction(word, &instr) == DR_OK) {
-            format_instruction(instr, line);
+            // canonical: test/decoder-test reassembles this output and
+            // compares it byte for byte
+            format_instruction(instr, FORMAT_CANONICAL, line);
             printf("    %s\n", line);
         } else {
             // keep the output reassemblable, byte for byte

@@ -108,5 +108,11 @@ const char* reg_name(u8 reg);
 // enough for any formatted instruction, including the `.word` fallback
 #define INSTRUCTION_STR_LEN 128
 
+enum FormatStyle {
+    FORMAT_CANONICAL,
+    FORMAT_PSEUDO,
+};
+
 void format_instruction(struct Instruction instr,
+                        enum FormatStyle style,
                         char out[static INSTRUCTION_STR_LEN]);

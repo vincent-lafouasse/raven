@@ -86,7 +86,7 @@ void format_trap(struct Trap trap, char out[static TRAP_STR_LEN])
     const bool has_instr = trap.cause == CAUSE_ILLEGAL_INSTRUCTION &&
                            decode_instruction(trap.tval, &instr) == DR_OK;
     if (has_instr) {
-        format_instruction(instr, instr_str);
+        format_instruction(instr, FORMAT_PSEUDO, instr_str);
     }
 
     const struct TrapDetail d = trap.detail;

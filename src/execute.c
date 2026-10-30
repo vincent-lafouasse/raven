@@ -279,11 +279,16 @@ enum TrapStatus execute(struct Hart hart[static 1],
             }
             break;
         case OP_JAL:
-            hart->x[rd] = next_pc;
-            next_pc = pc + (u32)imm;
-            break;
         case OP_JALR: {
-            const u32 target = hart->x[rs1] + (u32)imm;
+            // jalr ignores bit 0 of its target. Computed before rd is
+            // written, so `jalr ra, 0(ra)` works
+            const u32 target = instr.mnemonic == OP_JAL
+                                   ? pc + (u32)imm
+                                   : (hart->x[rs1] + (u32)imm) & ~1u;
+            if (target % 4 != 0) {
+                *trap_out = make_trap(CAUSE_MISALIGNED_FETCH, target);
+                return TRAP_RAISED;
+            }
             hart->x[rd] = next_pc;
             next_pc = target;
             break;

@@ -383,6 +383,12 @@ const char* csr_name(u32 csr)
             return "tdata2";
         case 0x7a3u:
             return "tdata3";
+        case 0x7a4u:
+            return "tinfo";
+        case 0x7a5u:
+            return "tcontrol";
+        case 0x7a8u:
+            return "mcontext";
         case 0x7b0u:
             return "dcsr";
         case 0x7b1u:
